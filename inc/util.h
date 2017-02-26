@@ -16,7 +16,8 @@
 void cpu_halt(const char * const file, const uint32_t line, const char * const expr);
 void delay(uint32_t ms);
 void uint_to_str(uint32_t n, uint8_t *str, uint8_t *size);
-void memset(uint8_t *buf, int8_t c, size_t size);
+void *memset(void *ptr, int value, size_t num);
+void *memcpy(void *destination, const void *source, size_t num);
 
 #endif /* UTIL_H_ */
 

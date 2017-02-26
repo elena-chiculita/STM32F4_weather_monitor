@@ -40,7 +40,8 @@ SOURCES_CC = core_irq_handlers.c \
              hal_lcd.c \
              lcd.c \
              util.c
-SOURCES_AS = startup.s
+SOURCES_AS = startup.s \
+             util_asm.s
 
 SOURCES_CC_PRE = $(SOURCES_CC:%=$(SRCDIR)/%)
 SOURCES_AS_PRE = $(SOURCES_AS:%=$(SRCDIR)/%)

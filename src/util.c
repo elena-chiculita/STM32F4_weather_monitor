@@ -51,16 +51,3 @@ void uint_to_str(uint32_t n, uint8_t *str, uint8_t *size)
         count--;
     }
 }
-
-void memset(uint8_t *buf, int8_t c, size_t size)
-{
-    size_t i;
-
-    ASSERT(buf != NULL);
-    ASSERT(size > 0);
-
-    for (i = 0; i < size; i++)
-    {
-        *(buf + i) = c;
-    }
-}

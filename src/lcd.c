@@ -3,6 +3,7 @@
 #include "util.h"
 #include "letters.c"
 
+
 extern lcd_function_set_v_t V;
 
 #define SCREEN_ROWS 6
@@ -14,8 +15,7 @@ extern lcd_function_set_v_t V;
 #define SCREEN_MAX_X 84
 #define SCREEN_SIZE (SCREEN_ROWS * SCREEN_MAX_X)
 
-static uint8_t screen[SCREEN_SIZE];
-uint8_t X, Y;
+static uint8_t X, Y, screen[SCREEN_SIZE];
 
 
 void lcd_screen_erase(void)
@@ -26,6 +26,8 @@ void lcd_screen_erase(void)
     {
         screen[i] = 0;
     }
+    X = Y = 0;
+    lcd_refresh();
 }
 
 void lcd_init(void)
@@ -75,15 +77,13 @@ void lcd_display_chars(uint8_t y_addr, uint8_t x_addr, uint8_t *buf, uint16_t si
         if (! ((line_offset + char_width) < SCREEN_MAX_X))
         {
             ptr += SCREEN_MAX_X;
-            line++;
             X = line_offset = 0;
-
+            line++;
             if (line > SCREEN_ROWS_TEXT_END)
             {
                 Y = 0;
                 break;
             }
-
             Y++;
         }
 
@@ -102,16 +102,17 @@ void lcd_print(uint8_t *buf, uint16_t size)
     lcd_refresh();
 }
 
-void lcd_display_int(uint8_t y_addr, uint8_t x_addr, int32_t n)
+void lcd_display_int(int32_t n)
 {
     if (n < 0)
     {
         n = 0 - n;
-        lcd_display_chars(y_addr, x_addr, (uint8_t *)"-", 1);
-        x_addr += chars_map['-' - 32][0];
+        lcd_display_chars(Y, X, (uint8_t *)"-", 1);
+        X += chars_map['-' - 32][0];
     }
 
-    lcd_display_uint(y_addr, x_addr, n);
+    lcd_display_uint(Y, X, n);
+    lcd_refresh();
 }
 
 void lcd_display_uint(uint8_t y_addr, uint8_t x_addr, uint32_t n)

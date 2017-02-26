@@ -56,3 +56,4 @@ void _systick_handler(uint32_t *stack)
     UNUSED(stack);
     while (1);
 }
+
