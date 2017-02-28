@@ -18,6 +18,7 @@ void delay(uint32_t ms);
 void uint_to_str(uint32_t n, uint8_t *str, uint8_t *size);
 void *memset(void *ptr, int value, size_t num);
 void *memcpy(void *destination, const void *source, size_t num);
+void *memmove(void *destination, const void *source, size_t num);
+int memcmp(const void *ptr1, const void *ptr2, size_t num);
 
 #endif /* UTIL_H_ */
-

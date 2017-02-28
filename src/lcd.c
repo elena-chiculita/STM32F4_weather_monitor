@@ -50,20 +50,18 @@ void lcd_set_contrast(uint8_t vop)
     hal_lcd_send_command_set_vop(vop);
 }
 
-void lcd_display_chars(uint8_t y_addr, uint8_t x_addr, uint8_t *buf, uint16_t size)
+void lcd_display_chars(uint8_t *buf, uint16_t size)
 {
     uint16_t i;
-    uint8_t j, c, char_width, line_offset, line;
+    uint8_t j, c, char_width;
     uint8_t *ptr;
 
     ASSERT(V == LCD_FUNCTION_SET_V_HORIZONTAL);
-    ASSERT((((int8_t) y_addr) >= SCREEN_ROWS_TEXT_BEGIN) && (y_addr <= SCREEN_ROWS_TEXT_END));
-    ASSERT(x_addr < SCREEN_MAX_X);
     ASSERT(buf != NULL);
-
-    line_offset = x_addr;
-    line = y_addr;
-    ptr = screen + (y_addr * SCREEN_MAX_X);
+    ASSERT((((int8_t) Y) >= SCREEN_ROWS_TEXT_BEGIN) && (Y <= SCREEN_ROWS_TEXT_END));
+    ASSERT(X < SCREEN_MAX_X);
+    
+    ptr = screen + (Y * SCREEN_MAX_X);
 
     for (i = 0; i < size; i++)
     {
@@ -74,54 +72,79 @@ void lcd_display_chars(uint8_t y_addr, uint8_t x_addr, uint8_t *buf, uint16_t si
         }
         char_width = chars_map[c - 32][0];
 
-        if (! ((line_offset + char_width) < SCREEN_MAX_X))
+        if ((X + char_width) >= SCREEN_MAX_X)
         {
             ptr += SCREEN_MAX_X;
-            X = line_offset = 0;
-            line++;
-            if (line > SCREEN_ROWS_TEXT_END)
+            X = 0;
+            Y++;
+            if (Y > SCREEN_ROWS_TEXT_END)
             {
                 Y = 0;
                 break;
             }
-            Y++;
         }
 
         for (j = 0; j < char_width; j++)
         {
-            *(ptr + line_offset + j) = chars[chars_map[c - 32][1] + j];
+            *(ptr + X + j) = chars[chars_map[c - 32][1] + j];
         }
-        line_offset += char_width + 1;
         X += char_width + 1;
+        if (X >= SCREEN_MAX_X)
+        {
+            X = 0;
+            Y++;
+            if (Y > SCREEN_ROWS_TEXT_END)
+            {
+                Y = 0;
+            }
+        }
     }
 }
 
 void lcd_print(uint8_t *buf, uint16_t size)
 {
-    lcd_display_chars(Y, X, buf, size);
+    lcd_display_chars(buf, size);
     lcd_refresh();
 }
 
 void lcd_display_int(int32_t n)
 {
+    if (X >= SCREEN_MAX_X)
+    {
+        X = 0;
+        Y++;
+        if (Y > SCREEN_ROWS_TEXT_END)
+        {
+            Y = 0;
+        }
+    }
+
     if (n < 0)
     {
         n = 0 - n;
-        lcd_display_chars(Y, X, (uint8_t *)"-", 1);
-        X += chars_map['-' - 32][0];
+        lcd_display_chars((uint8_t *)"-", 1);
+        if ((X + chars_map['-' - 32][0]) >= SCREEN_MAX_X)
+        {
+            X = 0;
+            Y++;
+            if (Y > SCREEN_ROWS_TEXT_END)
+            {
+                Y = 0;
+            }
+        }
     }
 
-    lcd_display_uint(Y, X, n);
+    lcd_display_uint(n);
     lcd_refresh();
 }
 
-void lcd_display_uint(uint8_t y_addr, uint8_t x_addr, uint32_t n)
+void lcd_display_uint(uint32_t n)
 {
     uint8_t buf[255], size;
     
     memset(buf, 0, sizeof(buf));
     uint_to_str(n, buf, &size);
-    lcd_display_chars(y_addr, x_addr, buf, size);
+    lcd_display_chars(buf, size);
 }
 
 void lcd_dot(uint8_t x, uint8_t y)
