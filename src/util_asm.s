@@ -223,7 +223,7 @@ memmove_end:
     @ r2 - number of bytes to compare
     @ return r0 - zero if they all match or a value different from zero
     @             representing which is greater if they do not.
-    @ preserves all registers except r0, r2
+    @ preserves all registers except r0, r3
     .global memcmp
     .type   memcmp, %function
 memcmp:
@@ -324,3 +324,21 @@ memcmp_end:
     pop     {r4}                @ restore preserved r4
     bx      lr                  @ return (pc = lr)
     .size memcmp, . - memcmp
+
+    @ Gets the length of the C string pointed by <r0>.
+    @ r0 - string pointer
+    @ return r0 - length of the C string
+    @ preserves all registers except r0, r1, r2
+    .global strlen
+    .type   strlen, %function
+strlen:
+    mov     r1, #0
+strlen_non_zero:
+    ldrb    r2, [r0, r1]        @ r2 = [r0 + r1] ; (copy 8-bits from [r0 + r3] address to r2)
+    add     r1, #1              @ increment offset
+    cmp     r2, #0              @ compare with NULL terminator char
+    bne     strlen_non_zero     @ repeat
+    sub     r1, r1, #1          @ do not count NULL terminator when found
+    mov     r0, r1              @ copy return value (string length) to r0
+    bx      lr                  @ return (pc = lr)
+    .size strlen, . - strlen

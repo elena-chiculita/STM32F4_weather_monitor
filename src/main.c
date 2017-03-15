@@ -5,6 +5,7 @@
 #include "hal_lcd.h"
 #include "lcd.h"
 #include "util.h"
+#include "lib.h"
 
 
 int main(void)
@@ -25,8 +26,7 @@ int main(void)
     hal_lcd_backlight_on();
     lcd_set_contrast(60);
 
-    lcd_print((uint8_t *)"abcdefghijklmnopqrstuvwxyz", 26);
-    delay(10);
+    printf("debug build\n");
 
 mainloop:
     if (gpio_get(GPIOA, 0))

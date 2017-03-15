@@ -13,38 +13,58 @@ CFLAGS          = -c -std=c11 -Wall -Wextra -fno-common -ffreestanding \
 CFLAGS_RELEASE  = -Os -flto
 CFLAGS_DEBUG    = -Og -ggdb3
 
-ifdef release
-CFLAGS  += $(CFLAGS_RELEASE)
-LDFLAGS += $(LDFLAGS_RELEASE)
-VARIANT  = release
-else
-CFLAGS  += $(CFLAGS_DEBUG)
-ASFLAGS += $(ASFLAGS_DEBUG)
-VARIANT  = debug
-endif
-
-SRCDIR    = src
-BUILDROOT = build
-BUILDDIR  = $(BUILDROOT)/$(VARIANT)
-
-TARGET          = $(BUILDDIR)/image
-ELF_NAME        = $(TARGET).elf
-BINARY_NAME     = $(TARGET).bin
-LISTING_NAME    = $(TARGET).lst
-MAP_NAME        = $(TARGET).map
-
-SOURCES_CC = core_irq_handlers.c \
-             main.c \
-             gpio.c \
-             led.c \
-             hal_lcd.c \
-             lcd.c \
-             util.c
+SOURCES_CC_COMMON = core_irq_handlers.c \
+                    gpio.c \
+                    led.c \
+                    hal_lcd.c \
+                    lcd.c \
+                    util.c \
+                    lib.c
+SOURCES_CC_BUILD = main.c
+SOURCES_CC_TEST = main_test.c \
+                  util_test.c
 SOURCES_AS = startup.s \
              util_asm.s
 
+ifeq ($(MAKECMDGOALS), debug)
+	SOURCES_CC = $(SOURCES_CC_COMMON) $(SOURCES_CC_BUILD)
+	CFLAGS  += $(CFLAGS_DEBUG)
+	ASFLAGS += $(ASFLAGS_DEBUG)
+	VARIANT = debug
+else ifeq ($(MAKECMDGOALS), test)
+	SOURCES_CC = $(SOURCES_CC_COMMON) $(SOURCES_CC_TEST)
+	CFLAGS  += $(CFLAGS_DEBUG)
+	ASFLAGS += $(ASFLAGS_DEBUG)
+	VARIANT = test
+	DEFINES += TARGET_TEST
+else ifeq ($(MAKECMDGOALS), release)
+	SOURCES_CC = $(SOURCES_CC_COMMON) $(SOURCES_CC_BUILD)
+	CFLAGS  += $(CFLAGS_RELEASE)
+	LDFLAGS += $(LDFLAGS_RELEASE)
+	VARIANT = release
+else
+	SOURCES_CC = $(SOURCES_CC_COMMON) $(SOURCES_CC_BUILD)
+	CFLAGS  += $(CFLAGS_DEBUG)
+	ASFLAGS += $(ASFLAGS_DEBUG)
+	VARIANT = debug
+endif
+
+SRCDIR = src
+BUILDROOT = build
+BUILDDIR = $(BUILDROOT)/$(VARIANT)
+
+IMAGE = $(BUILDDIR)/image
+ELF_NAME = $(IMAGE).elf
+BINARY_NAME = $(IMAGE).bin
+LISTING_NAME = $(IMAGE).lst
+MAP_NAME = $(IMAGE).map
+
+DEFINES_PRE = $(DEFINES:%=-D%)
+
+# Each C and ASM source file will have SRCDIR prepended
 SOURCES_CC_PRE = $(SOURCES_CC:%=$(SRCDIR)/%)
 SOURCES_AS_PRE = $(SOURCES_AS:%=$(SRCDIR)/%)
+# Replace .c/.s in these to obtain .o file
 OBJECTS_CC = $(SOURCES_CC_PRE:.c=.o)
 OBJECTS_AS = $(SOURCES_AS_PRE:.s=.o)
 # This isn't very pretty, but the premise here is to
@@ -65,6 +85,9 @@ release: clean build
 .PHONY: debug
 debug: build
 
+.PHONY: test
+test: build
+
 .PHONY: build
 build: dir $(OBJECTS_AS) $(OBJECTS_CC)
 	$(LD) $(LDFLAGS) $(OBJECTS_AS_DEST) $(OBJECTS_CC_DEST) -o $(ELF_NAME) $(LDLIBS)
@@ -77,10 +100,11 @@ build: dir $(OBJECTS_AS) $(OBJECTS_CC)
 	-$(OBJDUMP) -h -j .text -j .rodata -j .data -j .bss $(ELF_NAME)
 	@$(ECHO) "====="
 
-.c.o:
-	$(CC) $(CFLAGS) $(INCLUDES) $(DEFINES) $< -o $(BUILDDIR)/$@
+%.o : %.c
+	@$(ECHO) $< $@ $(BUILDDIR) $(IMAGE)
+	$(CC) $(CFLAGS) $(INCLUDES) $(DEFINES_PRE) $< -o $(BUILDDIR)/$@
 
-.s.o:
+%.o : %.s
 	$(AS) $(ASFLAGS) $< -o $(BUILDDIR)/$@
 
 dir:

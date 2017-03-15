@@ -7,10 +7,9 @@
 void lcd_screen_erase(void);
 void lcd_init(void);
 void lcd_set_contrast(uint8_t vop);
-void lcd_display_chars(uint8_t *buf, uint16_t size);
-void lcd_print(uint8_t *buf, uint16_t size);
-void lcd_display_uint(uint32_t n);
-void lcd_display_int(int32_t n);
+void lcd_putb(uint8_t *buf, uint32_t size);
+void lcd_display_chars(uint8_t *buf, uint32_t *size, uint8_t x, uint8_t y, uint16_t *pixels);
+void lcd_scroll_text(void);
 void lcd_dot(uint8_t x, uint8_t y);
 void lcd_line(int16_t x0, int16_t y0, int16_t x1, int16_t y1);
 void lcd_circle(int16_t x0, int16_t y0, uint8_t r);
