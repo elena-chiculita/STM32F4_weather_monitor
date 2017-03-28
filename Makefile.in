@@ -10,6 +10,6 @@ STRIP=arm-none-eabi-strip
 GDB=arm-none-eabi-gdb
 MAKE=make
 FILE=file
-RM=rm
+RM=rm -rf
 MKDIR=mkdir
 ECHO=echo
