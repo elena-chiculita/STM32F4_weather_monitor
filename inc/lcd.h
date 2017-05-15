@@ -7,6 +7,8 @@
 void lcd_screen_erase(void);
 void lcd_init(void);
 void lcd_set_contrast(uint8_t vop);
+void lcd_backlight_on(void);
+void lcd_backlight_off(void);
 void lcd_putb(uint8_t *buf, uint32_t size);
 void lcd_display_chars(uint8_t *buf, uint32_t *size, uint8_t x, uint8_t y, uint16_t *pixels);
 void lcd_scroll_text(void);

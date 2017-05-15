@@ -73,6 +73,88 @@ _isr_vectors:
     .word _pendsv_handler
     .word _systick_handler
     @ IRQs from here.
+    .word _wwdg_handler
+    .word _pvd_handler
+    .word _tamp_stamp_handler
+    .word _rtc_wkup_handler
+    .word _flash_handler
+    .word _rcc_handler
+    .word _exti0_handler
+    .word _exti1_handler
+    .word _exti2_handler
+    .word _exti3_handler
+    .word _exti4_handler
+    .word _dma1_stream0_handler
+    .word _dma1_stream1_handler
+    .word _dma1_stream2_handler
+    .word _dma1_stream3_handler
+    .word _dma1_stream4_handler
+    .word _dma1_stream5_handler
+    .word _dma1_stream6_handler
+    .word _adc_handler
+    .word _can1_tx_handler
+    .word _can1_rx0_handler
+    .word _can1_rx1_handler
+    .word _can1_sce_handler
+    .word _exti9_5_handler
+    .word _tim1_brk_tim9_handler
+    .word _tim1_up_tim10_handler
+    .word _tim1_trg_com_tim11_handler
+    .word _tim1_cc_handler
+    .word _tim2_handler
+    .word _tim3_handler
+    .word _tim4_handler
+    .word _i2c1_ev_handler
+    .word _i2c1_er_handler
+    .word _i2c2_ev_handler
+    .word _i2c2_er_handler
+    .word _spi1_handler
+    .word _spi2_handler
+    .word _usart1_handler
+    .word _usart2_handler
+    .word _usart3_handler
+    .word _exti15_10_handler
+    .word _rtc_alarm_handler
+    .word _otg_fs_handler
+    .word _tim8_brk_tim12_handler
+    .word _tim8_up_tim13_handler
+    .word _tim8_trg_com_tim14_handler
+    .word _tim8_cc_handler
+    .word _dma1_stream7_handler
+    .word _fsmc_handler
+    .word _sdio_handler
+    .word _tim5_handler
+    .word _spi3_handler
+    .word _uart4_handler
+    .word _uart5_handler
+    .word _tim6_dac_handler
+    .word _tim7_handler
+    .word _dma2_stream0_handler
+    .word _dma2_stream1_handler
+    .word _dma2_stream2_handler
+    .word _dma2_stream3_handler
+    .word _dma2_stream4_handler
+    .word _eth_handler
+    .word _eth_wkup_handler
+    .word _can2_tx_handler
+    .word _can2_rx0_handler
+    .word _can2_rx1_handler
+    .word _can2_sce_handler
+    .word _otg_fs_handler
+    .word _dma2_stream5_handler
+    .word _dma2_stream6_handler
+    .word _dma2_stream7_handler
+    .word _usart6_handler
+    .word _i2c3_ev_handler
+    .word _i2c3_er_handler
+    .word _otg_hs_ep1_out_handler
+    .word _otg_hs_ep1_in_handler
+    .word _otg_hs_wkup_handler
+    .word _otg_hs_handler
+    .word _dcmi_handler
+    .word _cryp_handler
+    .word _hash_rng_handler
+    .word _fpu_handdler
 
     @ Give handlers/ISRs weak bindings here so that they
     @ can be overridden later by any function with the same
@@ -100,3 +182,240 @@ _isr_vectors:
 
     .weak _systick_handler
     .thumb_set _systick_handler,                _default_handler
+
+    .weak _wwdg_handler
+    .thumb_set _wwdg_handler,                   _default_handler
+
+    .weak _pvd_handler
+    .thumb_set _pvd_handler,                    _default_handler
+
+    .weak _tamp_stamp_handler
+    .thumb_set _tamp_stamp_handler,             _default_handler
+
+    .weak _rtc_wkup_handler
+    .thumb_set _rtc_wkup_handler,               _default_handler
+
+    .weak _flash_handler
+    .thumb_set _flash_handler,                  _default_handler
+
+    .weak _rcc_handler
+    .thumb_set _rcc_handler,                    _default_handler
+
+    .weak _exti0_handler
+    .thumb_set _exti0_handler,                  _default_handler
+
+    .weak _exti1_handler
+    .thumb_set _exti1_handler,                  _default_handler
+
+    .weak _exti2_handler
+    .thumb_set _exti2_handler,                  _default_handler
+
+    .weak _exti3_handler
+    .thumb_set _exti3_handler,                  _default_handler
+
+    .weak _exti4_handler
+    .thumb_set _exti4_handler,                  _default_handler
+
+    .weak _dma1_stream0_handler
+    .thumb_set _dma1_stream0_handler,           _default_handler
+
+    .weak _dma1_stream1_handler
+    .thumb_set _dma1_stream1_handler,           _default_handler
+
+    .weak _dma1_stream2_handler
+    .thumb_set _dma1_stream2_handler,           _default_handler
+
+    .weak _dma1_stream3_handler
+    .thumb_set _dma1_stream3_handler,           _default_handler
+
+    .weak _dma1_stream4_handler
+    .thumb_set _dma1_stream4_handler,           _default_handler
+
+    .weak _dma1_stream5_handler
+    .thumb_set _dma1_stream5_handler,           _default_handler
+
+    .weak _dma1_stream6_handler
+    .thumb_set _dma1_stream6_handler,           _default_handler
+
+    .weak _adc_handler
+    .thumb_set _adc_handler,                    _default_handler
+
+    .weak _can1_tx_handler
+    .thumb_set _can1_tx_handler,                _default_handler
+
+    .weak _can1_rx0_handler
+    .thumb_set _can1_rx0_handler,               _default_handler
+
+    .weak _can1_rx1_handler
+    .thumb_set _can1_rx1_handler,               _default_handler
+
+    .weak _can1_sce_handler
+    .thumb_set _can1_sce_handler,               _default_handler
+
+    .weak _exti9_5_handler
+    .thumb_set _exti9_5_handler,                _default_handler
+
+    .weak _tim1_brk_tim9_handler
+    .thumb_set _tim1_brk_tim9_handler,          _default_handler
+
+    .weak _tim1_up_tim10_handler
+    .thumb_set _tim1_up_tim10_handler,          _default_handler
+
+    .weak _tim1_trg_com_tim11_handler
+    .thumb_set _tim1_trg_com_tim11_handler,     _default_handler
+
+    .weak _tim1_cc_handler
+    .thumb_set _tim1_cc_handler,                _default_handler
+
+    .weak _tim2_handler
+    .thumb_set _tim2_handler,                   _default_handler
+
+    .weak _tim3_handler
+    .thumb_set _tim3_handler,                   _default_handler
+
+    .weak _tim4_handler
+    .thumb_set _tim4_handler,                   _default_handler
+
+    .weak _i2c1_ev_handler
+    .thumb_set _i2c1_ev_handler,                _default_handler
+
+    .weak _i2c1_er_handler
+    .thumb_set _i2c1_er_handler,                _default_handler
+
+    .weak _i2c2_ev_handler
+    .thumb_set _i2c2_ev_handler,                _default_handler
+
+    .weak _i2c2_er_handler
+    .thumb_set _i2c2_er_handler,                _default_handler
+
+    .weak _usart1_handler
+    .thumb_set _usart1_handler,                 _default_handler
+
+    .weak _usart2_handler
+    .thumb_set _usart2_handler,                 _default_handler
+
+    .weak _usart3_handler
+    .thumb_set _usart3_handler,                 _default_handler
+
+    .weak _exti15_10_handler
+    .thumb_set _exti15_10_handler,              _default_handler
+
+    .weak _rtc_alarm_handler
+    .thumb_set _rtc_alarm_handler,              _default_handler
+
+    .weak _otg_fs_handler
+    .thumb_set _otg_fs_handler,                 _default_handler
+
+    .weak _tim8_brk_tim12_handler
+    .thumb_set _tim8_brk_tim12_handler,         _default_handler
+
+    .weak _tim8_up_tim13_handler
+    .thumb_set _tim8_up_tim13_handler,          _default_handler
+
+    .weak _tim8_trg_com_tim14_handler
+    .thumb_set _tim8_trg_com_tim14_handler,     _default_handler
+
+    .weak _tim8_cc_handler
+    .thumb_set _tim8_cc_handler,                _default_handler
+
+    .weak _dma1_stream7_handler
+    .thumb_set _dma1_stream7_handler,           _default_handler
+
+    .weak _fsmc_handler
+    .thumb_set _fsmc_handler,                   _default_handler
+
+    .weak _sdio_handler
+    .thumb_set _sdio_handler,                   _default_handler
+
+    .weak _tim5_handler
+    .thumb_set _tim5_handler,                   _default_handler
+
+    .weak _uart4_handler
+    .thumb_set _uart4_handler,                  _default_handler
+
+    .weak _uart5_handler
+    .thumb_set _uart5_handler,                  _default_handler
+
+    .weak _tim6_dac_handler
+    .thumb_set _tim6_dac_handler,               _default_handler
+
+    .weak _tim7_handler
+    .thumb_set _tim7_handler,                   _default_handler
+
+    .weak _dma2_stream0_handler
+    .thumb_set _dma2_stream0_handler,           _default_handler
+
+    .weak _dma2_stream1_handler
+    .thumb_set _dma2_stream1_handler,           _default_handler
+
+    .weak _dma2_stream2_handler
+    .thumb_set _dma2_stream2_handler,           _default_handler
+
+    .weak _dma2_stream3_handler
+    .thumb_set _dma2_stream3_handler,           _default_handler
+
+    .weak _dma2_stream4_handler
+    .thumb_set _dma2_stream4_handler,           _default_handler
+
+    .weak _eth_handler
+    .thumb_set _eth_handler,                    _default_handler
+
+    .weak _eth_wkup_handler
+    .thumb_set _eth_wkup_handler,               _default_handler
+
+    .weak _can2_tx_handler
+    .thumb_set _can2_tx_handler,                _default_handler
+
+    .weak _can2_rx0_handler
+    .thumb_set _can2_rx0_handler,               _default_handler
+
+    .weak _can2_rx1_handler
+    .thumb_set _can2_rx1_handler,               _default_handler
+
+    .weak _can2_sce_handler
+    .thumb_set _can2_sce_handler,               _default_handler
+
+    .weak _otg_fs_handler
+    .thumb_set _otg_fs_handler,                 _default_handler
+
+    .weak _dma2_stream5_handler
+    .thumb_set _dma2_stream5_handler,           _default_handler
+
+    .weak _dma2_stream6_handler
+    .thumb_set _dma2_stream6_handler,           _default_handler
+
+    .weak _dma2_stream7_handler
+    .thumb_set _dma2_stream7_handler,           _default_handler
+
+    .weak _usart6_handler
+    .thumb_set _usart6_handler,                 _default_handler
+
+    .weak _i2c3_ev_handler
+    .thumb_set _i2c3_ev_handler,                _default_handler
+
+    .weak _i2c3_er_handler
+    .thumb_set _i2c3_er_handler,                _default_handler
+
+    .weak _otg_hs_ep1_out_handler
+    .thumb_set _otg_hs_ep1_out_handler,         _default_handler
+
+    .weak _otg_hs_ep1_in_handler
+    .thumb_set _otg_hs_ep1_in_handler,          _default_handler
+
+    .weak _otg_hs_wkup_handler
+    .thumb_set _otg_hs_wkup_handler,            _default_handler
+
+    .weak _otg_hs_handler
+    .thumb_set _otg_hs_handler,                 _default_handler
+
+    .weak _dcmi_handler
+    .thumb_set _dcmi_handler,                   _default_handler
+
+    .weak _cryp_handler
+    .thumb_set _cryp_handler,                   _default_handler
+
+    .weak _hash_rng_handler
+    .thumb_set _hash_rng_handler,               _default_handler
+
+    .weak _fpu_handdler
+    .thumb_set _fpu_handdler,                   _default_handler

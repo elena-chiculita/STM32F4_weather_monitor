@@ -3,7 +3,7 @@ include Makefile.in
 INCLUDES        = -Iinc
 DEFINES         =
 LDFLAGS         = -static -nostartfiles -nostdlib -nodefaultlibs \
-			-Tlink_script.ld -Wl,-Map=$(MAP_NAME)
+			-T$(LINKER_SCRIPT) -Wl,-Map=$(MAP_NAME)
 LDFLAGS_RELEASE = -flto -Wl,-gc-sections -Wl,-print-gc-sections
 MCU_FLAGS       = -mcpu=cortex-m4 -mlittle-endian -mthumb -mfloat-abi=soft
 ASFLAGS         = --warn -EL $(MCU_FLAGS) -mfpu=softvfp
@@ -13,13 +13,20 @@ CFLAGS          = -c -std=c11 -Wall -Wextra -fno-common -ffreestanding \
 CFLAGS_RELEASE  = -Os -flto
 CFLAGS_DEBUG    = -Og -ggdb3
 
+LINKER_SCRIPT	= link_script.ld
+
 SOURCES_CC_COMMON = core_irq_handlers.c \
                     gpio.c \
                     led.c \
                     hal_lcd.c \
                     lcd.c \
                     util.c \
-                    lib.c
+                    lib.c \
+                    hal_spi.c \
+                    spi.c \
+                    hal_nvic.c \
+                    alloc.c \
+                    list.c
 SOURCES_CC_BUILD = main.c
 SOURCES_CC_TEST = main_test.c \
                   util_test.c
@@ -89,11 +96,11 @@ test: build
 .PHONY: build
 build: $(ELF_NAME) $(LISTING_NAME) $(BINARY_NAME)
 
-$(ELF_NAME): $(BUILDDIR)/$(SRCDIR) $(OBJECTS_AS_DEST) $(OBJECTS_CC_DEST)
+$(ELF_NAME): $(BUILDDIR)/$(SRCDIR) $(OBJECTS_AS_DEST) $(OBJECTS_CC_DEST) $(LINKER_SCRIPT)
 	@$(ECHO) "\nCreating $@"
 	$(LD) $(LDFLAGS) $(OBJECTS_AS_DEST) $(OBJECTS_CC_DEST) -o $@
 	-$(FILE) $(ELF_NAME)
-	-$(OBJDUMP) -h -j .text -j .rodata -j .data -j .bss $(ELF_NAME)
+	-$(OBJDUMP) -h -j .text -j .rodata -j .data -j .bss -j .stack -j .heap $(ELF_NAME)
 	@$(ECHO) "\n"
 
 $(LISTING_NAME): $(ELF_NAME)

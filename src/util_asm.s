@@ -1,3 +1,5 @@
+    .text
+
     @ Set <r2> bytes to <r1> value starting from address <r0>.
     @ r0 - buffer address
     @ r1 - value
@@ -54,7 +56,7 @@ memset_end:
     pop     {r5}                @ restore preserved r5
     pop     {r4}                @ restore preserved r4
     bx      lr                  @ return (pc = lr)
-    .size memset, . - memset
+    .size   memset, . - memset
 
 
     @ Copy <r2> bytes from address <r1> to address <r0>.
@@ -135,7 +137,7 @@ memcpy_end:
     pop     {r5}                @ restore preserved r5
     pop     {r4}                @ restore preserved r4
     bx      lr                  @ return (pc = lr)
-    .size memcpy, . - memcpy
+    .size   memcpy, . - memcpy
 
 
     @ Copy <r2> bytes from address <r1> to address <r0>.
@@ -214,7 +216,7 @@ memmove_end:
     pop     {r5}                @ restore preserved r5
     pop     {r4}                @ restore preserved r4
     bx      lr                  @ return (pc = lr)
-    .size memmove, . - memmove
+    .size   memmove, . - memmove
 
 
     @ Compares the first <r2> bytes between address <r0> and address <r1>.
@@ -323,7 +325,7 @@ memcmp_end:
     pop     {r5}                @ restore preserved r5
     pop     {r4}                @ restore preserved r4
     bx      lr                  @ return (pc = lr)
-    .size memcmp, . - memcmp
+    .size   memcmp, . - memcmp
 
     @ Gets the length of the C string pointed by <r0>.
     @ r0 - string pointer
@@ -341,4 +343,50 @@ strlen_non_zero:
     sub     r1, r1, #1          @ do not count NULL terminator when found
     mov     r0, r1              @ copy return value (string length) to r0
     bx      lr                  @ return (pc = lr)
-    .size strlen, . - strlen
+    .size   strlen, . - strlen
+
+    @ Read CONTROL register
+    @ return - CONTROL register content
+    @ preserves all registers except r0
+    .global core_reg_get_control
+    .type   core_reg_get_control, %function
+core_reg_get_control:
+    MRS     r0, CONTROL         @ r0 = CONTROL
+    bx      lr                  @ return (pc = lr)
+    .size   core_reg_get_control, . - core_reg_get_control
+
+    @ Write CONTROL register
+    @ r0 - value
+    @ return - none
+    @ preserves all registers except r0
+    .global core_reg_set_control
+    .type   core_reg_set_control, %function
+core_reg_set_control:
+    MSR     CONTROL, r0         @ CONTROL = r0
+    bx      lr                  @ return (pc = lr)
+    .size   core_reg_set_control, . - core_reg_set_control
+
+    @ Delay by <r0> miliseconds.
+    @ r0 - number of miliseconds
+    @ return - none
+    @ preserves all registers except r0, r1, r2
+    .global delay
+    .type   delay, %function
+delay:
+    cmp     r0, #0              @ compare number of miliseconds with 0
+    beq     delay_end           @ if equal jump to end
+    mov     r2, #0xc0           @ r2 = 0xc0 (value was manually adjusted to ensure the accuracy is good enough)
+delay_ms:
+    mov     r1, #0xf0           @ r1 = 0xf0 (value was manually adjusted to ensure the accuracy is good enough)
+    lsl     r1, r1, #4          @ r1 = r1 << 4
+    orr     r1, r1, r2          @ r1 |= 0xc0
+delay_counter:
+    sub     r1, #1              @ decrement counter
+    cmp     r1, #0              @ compare counter with 0
+    bne     delay_counter       @ if not equal continue
+    sub     r0, #1              @ decrement numnber of miliseconds
+    cmp     r0, #0              @ compare number of miliseconds with 0
+    bne     delay_ms            @ if not equal continue
+delay_end:
+    bx      lr                  @ return (pc = lr)
+    .size   delay, . - delay

@@ -58,6 +58,16 @@ void lcd_set_contrast(uint8_t vop)
     hal_lcd_send_command_set_vop(vop);
 }
 
+void lcd_backlight_on(void)
+{
+    hal_lcd_backlight_on();
+}
+
+void lcd_backlight_off(void)
+{
+    hal_lcd_backlight_off();
+}
+
 void lcd_putb(uint8_t *buf, uint32_t size)
 {
     uint32_t count, chars_left, pos;

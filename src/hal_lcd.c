@@ -1,4 +1,5 @@
 #include "hal_lcd.h"
+#include "spi.h"
 #include "gpio.h"
 #include "util.h"
 
@@ -7,28 +8,42 @@ lcd_function_set_h_t H = LCD_FUNCTION_SET_H_BASIC_INSTR_SET;
 lcd_function_set_v_t V = LCD_FUNCTION_SET_V_HORIZONTAL;
 lcd_function_set_pd_t PD = LCD_FUNCTION_SET_PD_POWER_DOWN;
 
+static volatile uint8_t hal_lcd_spi_transaction_flag = LCD_SPI_TRANSACTION_DONE;
+
 
 void hal_lcd_init(void)
 {
+#ifdef LCD_BIT_BANGING
     gpio_init(LCD_CLK_PORT, LCD_CLK_PIN, GPIO_MODER_OUTPUT, GPIO_OTYPER_PUSH_PULL,
               GPIO_OSPEEDR_VERY_HIGH, GPIO_PUPDR_NO_PULL);
     gpio_init(LCD_DIN_PORT, LCD_DIN_PIN, GPIO_MODER_OUTPUT, GPIO_OTYPER_PUSH_PULL,
               GPIO_OSPEEDR_VERY_HIGH, GPIO_PUPDR_NO_PULL);
+#endif /* LCD_BIT_BANGING */
     gpio_init(LCD_DC_PORT, LCD_DC_PIN, GPIO_MODER_OUTPUT, GPIO_OTYPER_PUSH_PULL,
               GPIO_OSPEEDR_VERY_HIGH, GPIO_PUPDR_NO_PULL);
+#ifdef LCD_BIT_BANGING
     gpio_init(LCD_CS_PORT, LCD_CS_PIN, GPIO_MODER_OUTPUT, GPIO_OTYPER_PUSH_PULL,
               GPIO_OSPEEDR_VERY_HIGH, GPIO_PUPDR_NO_PULL);
+#endif /* LCD_BIT_BANGING */
     gpio_init(LCD_RST_PORT, LCD_RST_PIN, GPIO_MODER_OUTPUT, GPIO_OTYPER_PUSH_PULL,
               GPIO_OSPEEDR_VERY_HIGH, GPIO_PUPDR_NO_PULL);
     gpio_init(LCD_LED_PORT, LCD_LED_PIN, GPIO_MODER_OUTPUT, GPIO_OTYPER_PUSH_PULL,
               GPIO_OSPEEDR_VERY_HIGH, GPIO_PUPDR_NO_PULL);
 
     gpio_set_value(LCD_RST_PORT, LCD_RST_PIN, LCD_RST_EN);
+#ifdef LCD_BIT_BANGING
     gpio_clear(LCD_CLK_PORT, LCD_CLK_PIN);
     gpio_clear(LCD_DIN_PORT, LCD_DIN_PIN);
+#endif /* LCD_BIT_BANGING */
     gpio_set_value(LCD_DC_PORT, LCD_DC_PIN, LCD_DC_DATA);
+#ifdef LCD_BIT_BANGING
     gpio_set_value(LCD_CS_PORT, LCD_CS_PIN, LCD_CS_DIS);
+#endif /* LCD_BIT_BANGING */
     gpio_clear(LCD_LED_PORT, LCD_LED_PIN);
+
+#ifndef LCD_BIT_BANGING
+    spi_init(LCD_SPI_ID);
+#endif /* LCD_BIT_BANGING */
 }
 
 void hal_lcd_reset(void)
@@ -48,54 +63,18 @@ void hal_lcd_backlight_off(void)
     gpio_clear(LCD_LED_PORT, LCD_LED_PIN);
 }
 
-void hal_lcd_pre_serializer(uint8_t buf, lcd_dc_t dc)
-{
-    gpio_set_value(LCD_DC_PORT, LCD_DC_PIN, dc);
-    gpio_clear(LCD_CLK_PORT, LCD_CLK_PIN);
-    gpio_set_value(LCD_DIN_PORT, LCD_DIN_PIN, ((buf >> 7) & 0x1));
-    gpio_set_value(LCD_CS_PORT, LCD_CS_PIN, LCD_CS_EN);
-}
-
-void hal_lcd_serializer(uint8_t buf)
-{
-    int8_t i;
-
-    for (i = 7; i >= 0; i--)
-    {
-        gpio_clear(LCD_CLK_PORT, LCD_CLK_PIN);
-        gpio_set_value(LCD_DIN_PORT, LCD_DIN_PIN, (buf >> i) & 0x1);
-        gpio_set(LCD_CLK_PORT, LCD_CLK_PIN);
-        gpio_set_value(LCD_DIN_PORT, LCD_DIN_PIN, (buf >> i) & 0x1);
-    }
-}
-
-void hal_lcd_post_serializer(void)
-{
-    gpio_clear(LCD_CLK_PORT, LCD_CLK_PIN);
-    gpio_clear(LCD_DIN_PORT, LCD_DIN_PIN);
-    gpio_set_value(LCD_CS_PORT, LCD_CS_PIN, LCD_CS_DIS);
-}
-
 void hal_lcd_send_data(uint8_t *buf, uint16_t size)
 {
-    int16_t n;
-
     ASSERT(buf != NULL);
-    ASSERT(size > 0);
 
-    hal_lcd_pre_serializer(*buf, LCD_DC_DATA);
-    for (n = 0; n < size; n++)
-    {
-        hal_lcd_serializer(*(buf + n));
-    }
-    hal_lcd_post_serializer();
+    hal_lcd_data_serializer(buf, size, LCD_DC_DATA);
 }
 
 void hal_lcd_send_command_nop(void)
 {
-    hal_lcd_pre_serializer(0x0, LCD_DC_COMMAND);
-    hal_lcd_serializer(0x0);
-    hal_lcd_post_serializer();
+    uint8_t buf = 0x0;
+
+    hal_lcd_data_serializer(&buf, 1, LCD_DC_COMMAND);
 }
 
 void hal_lcd_send_command_function_set(lcd_function_set_pd_t pd, 
@@ -122,9 +101,7 @@ void hal_lcd_send_command_function_set(lcd_function_set_pd_t pd,
     }
     buf |= H;
 
-    hal_lcd_pre_serializer(buf, LCD_DC_COMMAND);
-    hal_lcd_serializer(buf);
-    hal_lcd_post_serializer();
+    hal_lcd_data_serializer(&buf, 1, LCD_DC_COMMAND);
 }
 
 void hal_lcd_send_command_display_control(lcd_display_control_de_t de)
@@ -134,9 +111,7 @@ void hal_lcd_send_command_display_control(lcd_display_control_de_t de)
     hal_lcd_send_command_function_set(LCD_FUNCTION_SET_PD_PRESERVE,
         LCD_FUNCTION_SET_V_PRESERVE, LCD_FUNCTION_SET_H_BASIC_INSTR_SET);
 
-    hal_lcd_pre_serializer(buf, LCD_DC_COMMAND);
-    hal_lcd_serializer(buf);
-    hal_lcd_post_serializer();
+    hal_lcd_data_serializer(&buf, 1, LCD_DC_COMMAND);
 }
 
 void hal_lcd_send_command_set_y_addr(uint8_t y_addr)
@@ -149,9 +124,7 @@ void hal_lcd_send_command_set_y_addr(uint8_t y_addr)
     hal_lcd_send_command_function_set(LCD_FUNCTION_SET_PD_PRESERVE,
         LCD_FUNCTION_SET_V_PRESERVE, LCD_FUNCTION_SET_H_BASIC_INSTR_SET);
 
-    hal_lcd_pre_serializer(buf, LCD_DC_COMMAND);
-    hal_lcd_serializer(buf);
-    hal_lcd_post_serializer();
+    hal_lcd_data_serializer(&buf, 1, LCD_DC_COMMAND);
 }
 
 void hal_lcd_send_command_set_x_addr(uint8_t x_addr)
@@ -164,9 +137,7 @@ void hal_lcd_send_command_set_x_addr(uint8_t x_addr)
     hal_lcd_send_command_function_set(LCD_FUNCTION_SET_PD_PRESERVE,
         LCD_FUNCTION_SET_V_PRESERVE, LCD_FUNCTION_SET_H_BASIC_INSTR_SET);
 
-    hal_lcd_pre_serializer(buf, LCD_DC_COMMAND);
-    hal_lcd_serializer(buf);
-    hal_lcd_post_serializer();
+    hal_lcd_data_serializer(&buf, 1, LCD_DC_COMMAND);
 }
 
 void hal_lcd_send_command_temp_control(lcd_temp_control_tc_t tc)
@@ -176,9 +147,7 @@ void hal_lcd_send_command_temp_control(lcd_temp_control_tc_t tc)
     hal_lcd_send_command_function_set(LCD_FUNCTION_SET_PD_PRESERVE,
         LCD_FUNCTION_SET_V_PRESERVE, LCD_FUNCTION_SET_H_EXT_INSTR_SET);
 
-    hal_lcd_pre_serializer(buf, LCD_DC_COMMAND);
-    hal_lcd_serializer(buf);
-    hal_lcd_post_serializer();
+    hal_lcd_data_serializer(&buf, 1, LCD_DC_COMMAND);
 }
 
 void hal_lcd_send_command_bias_system(uint8_t val)
@@ -191,9 +160,7 @@ void hal_lcd_send_command_bias_system(uint8_t val)
     hal_lcd_send_command_function_set(LCD_FUNCTION_SET_PD_PRESERVE,
         LCD_FUNCTION_SET_V_PRESERVE, LCD_FUNCTION_SET_H_EXT_INSTR_SET);
 
-    hal_lcd_pre_serializer(buf, LCD_DC_COMMAND);
-    hal_lcd_serializer(buf);
-    hal_lcd_post_serializer();
+    hal_lcd_data_serializer(&buf, 1, LCD_DC_COMMAND);
 }
 
 void hal_lcd_send_command_set_vop(uint8_t vop)
@@ -206,8 +173,51 @@ void hal_lcd_send_command_set_vop(uint8_t vop)
     hal_lcd_send_command_function_set(LCD_FUNCTION_SET_PD_PRESERVE,
         LCD_FUNCTION_SET_V_PRESERVE, LCD_FUNCTION_SET_H_EXT_INSTR_SET);
 
-    hal_lcd_pre_serializer(buf, LCD_DC_COMMAND);
-    hal_lcd_serializer(buf);
-    hal_lcd_post_serializer();
+    hal_lcd_data_serializer(&buf, 1, LCD_DC_COMMAND);
 }
 
+void hal_lcd_data_serializer(uint8_t *buf, uint16_t size, lcd_dc_t dc)
+{
+    uint16_t n;
+    int8_t i;
+
+    ASSERT(buf != NULL);
+
+    gpio_set_value(LCD_DC_PORT, LCD_DC_PIN, dc);
+
+#ifdef LCD_BIT_BANGING
+    gpio_clear(LCD_CLK_PORT, LCD_CLK_PIN);
+    gpio_set_value(LCD_DIN_PORT, LCD_DIN_PIN, ((*buf >> 7) & 0x1));
+    gpio_set_value(LCD_CS_PORT, LCD_CS_PIN, LCD_CS_EN);
+
+    for (n = 0; n < size; n++)
+    {
+        for (i = 7; i >= 0; i--)
+        {
+            gpio_clear(LCD_CLK_PORT, LCD_CLK_PIN);
+            gpio_set_value(LCD_DIN_PORT, LCD_DIN_PIN, (*(buf + n) >> i) & 0x1);
+            gpio_set(LCD_CLK_PORT, LCD_CLK_PIN);
+            gpio_set_value(LCD_DIN_PORT, LCD_DIN_PIN, (*(buf + n) >> i) & 0x1);
+        }
+    }
+    gpio_clear(LCD_CLK_PORT, LCD_CLK_PIN);
+    gpio_clear(LCD_DIN_PORT, LCD_DIN_PIN);
+    gpio_set_value(LCD_CS_PORT, LCD_CS_PIN, LCD_CS_DIS);
+#else
+    UNUSED(n);
+    UNUSED(i);
+
+    while (hal_lcd_spi_transaction_flag != LCD_SPI_TRANSACTION_DONE);
+    hal_lcd_spi_transaction_flag = LCD_SPI_TRANSACTION_IN_PROGRESS;
+
+    spi_tx(buf, (size_t)size, SPI_DEVICE_LCD, hal_lcd_spi_callback);
+#endif /* LCD_BIT_BANGING */
+}
+
+#ifndef LCD_BIT_BANGING
+void hal_lcd_spi_callback(uint8_t *data)
+{
+    UNUSED(data);
+    hal_lcd_spi_transaction_flag = LCD_SPI_TRANSACTION_DONE;
+}
+#endif /* LCD_BIT_BANGING */

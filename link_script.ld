@@ -43,12 +43,22 @@ SECTIONS {
         PROVIDE(__bss_end__   = _bss_end);
     } > SRAM1
 
+    /* Heap, fully ascending, between bss and stack. */
+    .heap : {
+        _heap_begin = . ;
+        *(.heap)
+        *(.heap*)
+        _heap_end = . ;
+        _heap_size = _heap_end - _heap_begin;
+        ASSERT(_heap_begin >= _bss_end, "Error: BSS/Heap collision.");
+    } > SRAM1
+
     /* Stack, fully descending. Default size: 1024. */
     .stack : {
         _stack_size  = DEFINED(_stack_size) ? _stack_size : 0x400;
         _stack_end   = ORIGIN(SRAM1) + LENGTH(SRAM1);
         _stack_begin = _stack_end - _stack_size;
-        ASSERT(_stack_begin >= _bss_end, "Error: BSS/Stack collision.");
+        ASSERT(_stack_begin >= _heap_end, "Error: Heap/Stack collision.");
     } > SRAM1
 
     /DISCARD/ : {

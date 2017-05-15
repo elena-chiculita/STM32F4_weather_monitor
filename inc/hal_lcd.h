@@ -98,14 +98,10 @@ typedef enum lcd_temp_control_tc_tag
 } lcd_temp_control_tc_t;
 
 
-void lcd_screen_erase(void);
 void hal_lcd_init(void);
 void hal_lcd_reset(void);
 void hal_lcd_backlight_on(void);
 void hal_lcd_backlight_off(void);
-void hal_lcd_pre_serializer(uint8_t buf, lcd_dc_t dc);
-void hal_lcd_serializer(uint8_t buf);
-void hal_lcd_post_serializer(void);
 void hal_lcd_send_data(uint8_t *buf, uint16_t size);
 void hal_lcd_send_command_nop(void);
 void hal_lcd_send_command_function_set(lcd_function_set_pd_t pd, 
@@ -117,6 +113,18 @@ void hal_lcd_send_command_set_x_addr(uint8_t x_addr);
 void hal_lcd_send_command_temp_control(lcd_temp_control_tc_t tc);
 void hal_lcd_send_command_bias_system(uint8_t val);
 void hal_lcd_send_command_set_vop(uint8_t vop);
+void hal_lcd_data_serializer(uint8_t *buf, uint16_t size, lcd_dc_t dc);
+
+#ifndef LCD_BIT_BANGING
+
+#define LCD_SPI_ID SPI2
+
+/* to be used with hal_lcd_spi_transaction_flag */
+#define LCD_SPI_TRANSACTION_IN_PROGRESS 0
+#define LCD_SPI_TRANSACTION_DONE 1
+
+void hal_lcd_spi_callback(uint8_t *data);
+
+#endif /* LCD_BIT_BANGING */
 
 #endif /* HAL_LCD_H_ */
-
