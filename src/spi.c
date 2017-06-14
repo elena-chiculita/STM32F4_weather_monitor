@@ -2,6 +2,8 @@
 #include "gpio.h"
 #include "util.h"
 #include "hal_nvic.h"
+#include "hal_lcd.h"
+#include "hal_bme280.h"
 #include "alloc.h"
 #include "list.h"
 
@@ -12,12 +14,13 @@ typedef struct spi_device_tag
    spi_id_t spi_id;
    gpio_port_t nss_port;
    uint8_t nss_pin;
+   bool is_init;
 } spi_device_t;
 
 spi_device_t spi_devices[] =
 {
-    {SPI_DEVICE_LCD, SPI2, GPIOB, 12},
-    {SPI_DEVICE_SENSOR, SPI2, GPIOE, 13}
+    {SPI_DEVICE_LCD, LCD_SPI_ID, SPI2_NSS_PORT_LCD, SPI2_NSS_PIN_LCD, FALSE},
+    {SPI_DEVICE_BME280, BME280_SPI_ID, SPI2_NSS_PORT_BME280, SPI2_NSS_PIN_BME280, FALSE}
 };
 
 typedef enum spi_store_id_tag
@@ -44,6 +47,7 @@ typedef struct spi_store_tag
     spi_id_t spi_id;
     spi_transaction_t *spi_transaction;
     list_t list;
+    bool is_init;
 } spi_store_t;
 
 volatile spi_store_t spi_store[SPI_ID_MAX];
@@ -59,7 +63,6 @@ void spi_init(spi_id_t spi_id)
     uint8_t mosi_pin, miso_pin, clk_pin;
     gpio_af_t gpio_af;
     irq_id_t irq_id;
-    uint32_t i;
 
     switch (spi_id)
     {
@@ -113,17 +116,6 @@ void spi_init(spi_id_t spi_id)
     set_gpio_afr(mosi_port, mosi_pin, gpio_af);
     set_gpio_afr(miso_port, miso_pin, gpio_af);
     set_gpio_afr(clk_port, clk_pin, gpio_af);
-    
-    for (i = 0; i < (sizeof(spi_devices) / sizeof(spi_devices[0])); i++)
-    {
-        gpio_init(spi_devices[i].nss_port,
-                  spi_devices[i].nss_pin,
-                  GPIO_MODER_OUTPUT,
-                  GPIO_OTYPER_PUSH_PULL,
-                  GPIO_OSPEEDR_VERY_HIGH,
-                  GPIO_PUPDR_NO_PULL);
-        gpio_set(spi_devices[i].nss_port, spi_devices[i].nss_pin);
-    }
 
     hal_spi_init(spi_id,
                  SPI_CR1_BR_PCLK_BY_4,
@@ -141,6 +133,41 @@ void spi_init(spi_id_t spi_id)
 
     hal_spi_rx(spi_id);
     hal_nvic_enable(irq_id);
+    spi_store[spi_store_id].is_init = TRUE;
+
+    /* enable interrupts */
+    _enable_irq();
+}
+
+void spi_device_init(spi_device_id_t spi_device_id)
+{
+    spi_device_t *spi_device;
+
+    /* disable interrupts */
+    _disable_irq();
+
+    spi_device = spi_device_get(spi_device_id);
+    ASSERT(spi_device != NULL);
+    ASSERT(
+        (spi_device->spi_id == SPI1) ||
+        (spi_device->spi_id == SPI2) ||
+        (spi_device->spi_id == SPI3) ||
+        (spi_device->spi_id == SPI4) ||
+        (spi_device->spi_id == SPI5) ||
+        (spi_device->spi_id == SPI6)
+    );
+
+    if (spi_device->is_init == FALSE)
+    {
+        gpio_init(spi_device->nss_port,
+                  spi_device->nss_pin,
+                  GPIO_MODER_OUTPUT,
+                  GPIO_OTYPER_PUSH_PULL,
+                  GPIO_OSPEEDR_VERY_HIGH,
+                  GPIO_PUPDR_NO_PULL);
+        gpio_set(spi_device->nss_port, spi_device->nss_pin);
+        spi_device->is_init = TRUE;
+    }
 
     /* enable interrupts */
     _enable_irq();
@@ -163,6 +190,9 @@ void spi_txrx(uint8_t *data_tx, uint8_t *data_rx, size_t size,
     spi_device_t *spi_device;
     spi_transaction_t *spi_transaction;
 
+    /* disable interrupts */
+    _disable_irq();
+
     spi_device = spi_device_get(spi_device_id);
     ASSERT(spi_device != NULL);
     ASSERT(
@@ -173,12 +203,11 @@ void spi_txrx(uint8_t *data_tx, uint8_t *data_rx, size_t size,
         (spi_device->spi_id == SPI5) ||
         (spi_device->spi_id == SPI6)
     );
-
-    /* disable interrupts */
-    _disable_irq();
+    ASSERT(spi_device->is_init == TRUE);
 
     spi_store = spi_get_store(spi_device->spi_id);
     ASSERT(spi_store != NULL);
+    ASSERT(spi_store->is_init == TRUE);
 
     spi_transaction = calloc(1, sizeof(spi_transaction_t));
     ASSERT(spi_transaction != NULL);
@@ -189,15 +218,7 @@ void spi_txrx(uint8_t *data_tx, uint8_t *data_rx, size_t size,
     spi_transaction->nss_port = spi_device->nss_port;
     spi_transaction->nss_pin = spi_device->nss_pin;
 
-    if (spi_store->spi_transaction == NULL)
-    {
-        gpio_clear(spi_transaction->nss_port, spi_transaction->nss_pin);
-        spi_store->spi_transaction = spi_transaction;
-    }
-    else
-    {
-        list_add_last((list_t *)&spi_store->list, (list_elem_t *)&spi_transaction->elem);
-    }
+    list_add_last((list_t *)&spi_store->list, (list_elem_t *)&spi_transaction->elem);
 
     /* enable interrupts */
     _enable_irq();
@@ -217,54 +238,69 @@ void _spi_handler(spi_id_t spi_id)
 
     spi_store = spi_get_store(spi_id);
     ASSERT(spi_store != NULL);
-    ASSERT(&spi_store->spi_transaction != NULL);
 
-    if (get_spi_cr2_rxneie(spi_id) && get_spi_sr_rxne(spi_id))
+    if (spi_store->spi_transaction == NULL)
     {
-        if (spi_store->spi_transaction->data_rx != NULL)
+        first = list_remove_first((list_t *)&spi_store->list);
+        if (first == NULL)
         {
-            *spi_store->spi_transaction->data_rx = hal_spi_rx(spi_id);
-            spi_store->spi_transaction->data_rx++;
+            set_spi_cr2_txeie(spi_id, SPI_CR2_TXEIE_MASKED);
         }
-        else
-        {
-            hal_spi_rx(spi_id);
-        }
+
+        spi_store->spi_transaction = (spi_transaction_t *)first;
     }
-
-    if (get_spi_cr2_txeie(spi_id) && get_spi_sr_txe(spi_id))
+    else
     {
-        if (spi_store->spi_transaction->size == 0)
+        gpio_clear(spi_store->spi_transaction->nss_port, spi_store->spi_transaction->nss_pin);
+
+        if (get_spi_cr2_rxneie(spi_id) && get_spi_sr_rxne(spi_id))
         {
-            fn = spi_store->spi_transaction->fn;
-            data = spi_store->spi_transaction->data_tx;
-            free(spi_store->spi_transaction);
-
-            ASSERT(fn != NULL);
-            fn(data);
-
-            first = list_remove_first((list_t *)&spi_store->list);
-            if (first == NULL)
+            if (spi_store->spi_transaction->data_rx != NULL)
             {
-                gpio_set(spi_store->spi_transaction->nss_port, spi_store->spi_transaction->nss_pin);
-                set_spi_cr2_txeie(spi_id, SPI_CR2_TXEIE_MASKED);
-            }
-
-            spi_store->spi_transaction = (spi_transaction_t *)first;
-        }
-        else
-        {
-            if (spi_store->spi_transaction->data_tx != NULL)
-            {
-                hal_spi_tx(spi_id, *(spi_store->spi_transaction->data_tx));
-                spi_store->spi_transaction->data_tx++;
+                *spi_store->spi_transaction->data_rx = hal_spi_rx(spi_id);
+                spi_store->spi_transaction->data_rx++;
             }
             else
             {
-                hal_spi_tx(spi_id, 0x0);
+                hal_spi_rx(spi_id);
             }
+        }
 
-            spi_store->spi_transaction->size--;
+        if (get_spi_cr2_txeie(spi_id) && get_spi_sr_txe(spi_id))
+        {
+            if (spi_store->spi_transaction->size == 0)
+            {
+                gpio_set(spi_store->spi_transaction->nss_port, spi_store->spi_transaction->nss_pin);
+                fn = spi_store->spi_transaction->fn;
+                data = spi_store->spi_transaction->data_tx;
+                free(spi_store->spi_transaction);
+                spi_store->spi_transaction = NULL;
+
+                ASSERT(fn != NULL);
+                fn(data);
+
+                first = list_remove_first((list_t *)&spi_store->list);
+                if (first == NULL)
+                {
+                    set_spi_cr2_txeie(spi_id, SPI_CR2_TXEIE_MASKED);
+                }
+
+                spi_store->spi_transaction = (spi_transaction_t *)first;
+            }
+            else
+            {
+                if (spi_store->spi_transaction->data_tx != NULL)
+                {
+                    hal_spi_tx(spi_id, *(spi_store->spi_transaction->data_tx));
+                    spi_store->spi_transaction->data_tx++;
+                }
+                else
+                {
+                    hal_spi_tx(spi_id, 0x0);
+                }
+
+                spi_store->spi_transaction->size--;
+            }
         }
     }
 

@@ -58,6 +58,42 @@ int printf(const char *format, ...)
                         count += size;
                         break;
                     }
+
+                    case 'x':
+                    case 'X':   
+                    {
+                        uint8_t buf[255], size;
+                        int n;
+
+                        n = va_arg(ap, int);
+                        hex_to_str(n, buf, &size, ((*p == 'x') ? FALSE : TRUE));
+                        if (p > (format + 1))
+                        {
+                            count += (p - format - 1);
+                            lcd_putb((uint8_t *)format, p - format - 1);
+                        }
+                        format = p + 1;
+                        lcd_putb(buf, size);
+                        count += size;
+                        break;
+                    }
+
+                    case 'c':
+                    {
+                        char c;
+
+                        c = (char)va_arg(ap, int);
+                        if (p > (format + 1))
+                        {
+                            count += (p - format - 1);
+                            lcd_putb((uint8_t *)format, p - format - 1);
+                        }
+                        format = p + 1;
+                        lcd_putb((uint8_t *)&c, 1);
+                        count += 1;
+                        break;
+                    }
+
                     case 's':
                     {
                         char *str;
@@ -73,6 +109,7 @@ int printf(const char *format, ...)
                         count += strlen(str);
                         break;
                     }
+
                     default:
                         break;
                 }

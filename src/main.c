@@ -4,15 +4,18 @@
 #include "gpio.h"
 #include "hal_lcd.h"
 #include "lcd.h"
+#include "spi.h"
 #include "util.h"
 #include "lib.h"
 #include "alloc.h"
-#include "spi.h"
+#include "bme280.h"
 
 
 int main(void)
 {
-    uint8_t data_tx[] = {1, 4, 24, 255}, data_rx[] = {35, 69, 103, 137};
+    int32_t temp, press, hum, div;
+    uint16_t mod_hum;
+    uint8_t mod_temp, mod_press;
 
     alloc_init();
 
@@ -22,7 +25,7 @@ int main(void)
     led_init(LED_BLUE_PORT, LED_BLUE_PIN);
 
     led_on(LED_BLUE_PORT, LED_BLUE_PIN);
-    
+
     gpio_init(GPIOA, 0, GPIO_MODER_INPUT, GPIO_OTYPER_PUSH_PULL,
               GPIO_OSPEEDR_VERY_HIGH, GPIO_PUPDR_NO_PULL);
 
@@ -37,20 +40,35 @@ int main(void)
         led_on(LED_GREEN_PORT, LED_GREEN_PIN);
     }
 
+    spi_init(LCD_SPI_ID);
+
     lcd_init();
     lcd_backlight_on();
     lcd_set_contrast(60);
-
-    printf("debug build\n");
 
     led_on(LED_ORANGE_PORT, LED_ORANGE_PIN);
     delay(1000);
     led_off(LED_ORANGE_PORT, LED_ORANGE_PIN);
 
-    spi_txrx(data_tx, data_rx, sizeof(data_tx), SPI_DEVICE_SENSOR, hal_lcd_spi_callback);
-    printf("%d %d %d %d", data_rx[0], data_rx[1], data_rx[2], data_rx[3]);
+    bme280_init(BME280_MODE_FORCED, BME280_OSRS_1, BME280_OSRS_1, BME280_OSRS_1);
 
 mainloop:
+
+    bme280_poll(&press, &temp, &hum);
+
+    div = temp / 100;
+    mod_temp = (uint8_t)(temp - (div * 100));
+    printf("\n%d.%d%cC ", div, mod_temp, 248);
+
+    mod_hum = (((uint16_t)hum & 0x3FF) * 99) / 1023;
+    div = hum >> 10;
+    printf("%d.%d%%RH", div, mod_hum);
+
+    mod_press = (((uint8_t)press) * 99) / 255;
+    div = press >> 8;
+    printf("\n%d.%d Pa", div, mod_press);
+
+    delay(2000);
 
     if (gpio_get(GPIOA, 0))
     {

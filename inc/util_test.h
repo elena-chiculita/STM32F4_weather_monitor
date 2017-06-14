@@ -1,16 +1,8 @@
 #ifndef UTIL_TEST_H_
 #define UTIL_TEST_H_
 
-extern uint32_t testId;
+#include "test.h"
 
-#define TEST(cond) \
-    { \
-        testId++; \
-        if (!(cond)) \
-        { \
-            return FALSE; \
-        } \
-    }
 
 uint32_t memset_test(void);
 uint32_t memcpy_test(void);

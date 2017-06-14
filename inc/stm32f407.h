@@ -384,8 +384,8 @@ typedef enum spi_id_tag
 #define SPI2_CLK_PIN 13
 #define SPI2_NSS_PORT_LCD GPIOB
 #define SPI2_NSS_PIN_LCD 12
-#define SPI2_NSS_PORT_SENSOR GPIOE
-#define SPI2_NSS_PIN_SENSOR 15
+#define SPI2_NSS_PORT_BME280 GPIOE
+#define SPI2_NSS_PIN_BME280 15
 
 /* SPI3 */
 #define SPI3_MOSI_PORT GPIOB

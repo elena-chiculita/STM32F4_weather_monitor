@@ -6,9 +6,9 @@ LDFLAGS         = -static -nostartfiles -nostdlib -nodefaultlibs \
 			-T$(LINKER_SCRIPT) -Wl,-Map=$(MAP_NAME)
 LDFLAGS_RELEASE = -flto -Wl,-gc-sections -Wl,-print-gc-sections
 MCU_FLAGS       = -mcpu=cortex-m4 -mlittle-endian -mthumb -mfloat-abi=soft
-ASFLAGS         = --warn -EL $(MCU_FLAGS) -mfpu=softvfp
+ASFLAGS         = --fatal-warnings -EL $(MCU_FLAGS) -mfpu=softvfp
 ASFLAGS_DEBUG   = -g
-CFLAGS          = -c -std=c11 -Wall -Wextra -fno-common -ffreestanding \
+CFLAGS          = -c -std=c11 -Wall -Wextra -Werror -fno-common -ffreestanding \
 			-ffunction-sections -fdata-sections $(MCU_FLAGS)
 CFLAGS_RELEASE  = -Os -flto
 CFLAGS_DEBUG    = -Og -ggdb3
@@ -26,10 +26,15 @@ SOURCES_CC_COMMON = core_irq_handlers.c \
                     spi.c \
                     hal_nvic.c \
                     alloc.c \
-                    list.c
+                    list.c \
+                    hal_bme280.c \
+                    bme280.c \
+                    int_64.c \
+                    uint_64.c
 SOURCES_CC_BUILD = main.c
 SOURCES_CC_TEST = main_test.c \
-                  util_test.c
+                  util_test.c \
+                  int_64_test.c
 SOURCES_AS = startup.s \
              util_asm.s
 

@@ -162,7 +162,7 @@ void free(void *ptr)
 {
     /* disable interrupts */
     _disable_irq();
-    ((pool_4_block_t *)((uint8_t *)ptr - FIELD_OFFSET(pool_4_block_t, free)))->free = TRUE;
+    ((pool_4_block_t *)((uint8_t *)ptr - FIELD_OFFSET(pool_4_block_t, data)))->free = TRUE;
     /* enable interrupts */
     _enable_irq();
 }

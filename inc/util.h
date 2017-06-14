@@ -20,6 +20,7 @@ void _enable_irq(void);
 void cpu_halt(const char * const file, const uint32_t line, const char * const expr);
 void uint_to_str(uint32_t n, uint8_t *str, uint8_t *size);
 void int_to_str(int32_t n, uint8_t *str, uint8_t *size);
+void hex_to_str(uint32_t n, uint8_t *str, uint8_t *size, bool uppercase);
 void *memset(void *ptr, int value, size_t num);
 void *memcpy(void *destination, const void *source, size_t num);
 void *memmove(void *destination, const void *source, size_t num);

@@ -42,7 +42,7 @@ void hal_lcd_init(void)
     gpio_clear(LCD_LED_PORT, LCD_LED_PIN);
 
 #ifndef LCD_BIT_BANGING
-    spi_init(LCD_SPI_ID);
+    spi_device_init(SPI_DEVICE_LCD);
 #endif /* LCD_BIT_BANGING */
 }
 
