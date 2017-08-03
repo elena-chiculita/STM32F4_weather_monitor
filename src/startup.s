@@ -48,7 +48,7 @@ bss_end:
     .global _default_handler
     .type   _default_handler, %function
 _default_handler:
-        b       .
+    b       .
     .size _default_handler, . - _default_handler
 
 
@@ -288,6 +288,12 @@ _isr_vectors:
     .weak _i2c2_er_handler
     .thumb_set _i2c2_er_handler,                _default_handler
 
+    .weak _spi1_handler
+    .thumb_set _spi1_handler,                   _default_handler
+
+    .weak _spi2_handler
+    .thumb_set _spi2_handler,                   _default_handler
+
     .weak _usart1_handler
     .thumb_set _usart1_handler,                 _default_handler
 
@@ -329,6 +335,9 @@ _isr_vectors:
 
     .weak _tim5_handler
     .thumb_set _tim5_handler,                   _default_handler
+
+    .weak _spi3_handler
+    .thumb_set _spi3_handler,                   _default_handler
 
     .weak _uart4_handler
     .thumb_set _uart4_handler,                  _default_handler

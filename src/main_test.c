@@ -7,6 +7,7 @@
 #include "util.h"
 #include "util_test.h"
 #include "int_64_test.h"
+#include "list_test.h"
 #include "lib.h"
 #include "alloc.h"
 #include "spi.h"
@@ -83,6 +84,13 @@ int main(void)
     }
     printf("OK\n");
 
+    printf("list ");
+    if (list_test() != PASS)
+    {
+        printf("FAILED %d\n", testId);
+        goto mainloop;
+    }
+    printf("OK\n");
 
 mainloop:
 

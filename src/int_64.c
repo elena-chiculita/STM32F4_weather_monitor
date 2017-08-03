@@ -159,10 +159,7 @@ int_64_t int_64_div(int_64_t a, int_64_t b)
     one.msb = 0;
     one.lsb = 1;
 
-    if ((b.msb == 0) && (b.lsb == 0))
-    {
-        return tmp;
-    }
+    ASSERT((b.msb != 0) || (b.lsb != 0));
 
     sign = ((a.msb & 0x80000000) ^ (b.msb & 0x80000000)) >> 31;
     if (a.msb & 0x80000000)

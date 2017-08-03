@@ -1,5 +1,5 @@
-#ifndef BME280_H_
-#define BME280_H_
+#ifndef _BME280_H_
+#define _BME280_H_
 
 #include "hal_bme280.h"
 
@@ -19,4 +19,4 @@ uint32_t bme280_compensate_press(int32_t press_raw);
 uint32_t bme280_compensate_hum(int32_t hum_raw);
 void bme280_poll(int32_t *press, int32_t *temp, int32_t *hum);
 
-#endif /* BME280_H_ */
+#endif /* _BME280_H_ */

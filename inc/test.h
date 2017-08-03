@@ -1,5 +1,5 @@
-#ifndef TEST_H_
-#define TEST_H_
+#ifndef _TEST_H_
+#define _TEST_H_
 
 #include "embedded_types.h"
 
@@ -22,4 +22,4 @@ extern uint32_t testId;
         } \
     }
 
-#endif /* TEST_H_ */
+#endif /* _TEST_H_ */

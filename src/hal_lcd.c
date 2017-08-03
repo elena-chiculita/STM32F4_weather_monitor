@@ -8,7 +8,9 @@ lcd_function_set_h_t H = LCD_FUNCTION_SET_H_BASIC_INSTR_SET;
 lcd_function_set_v_t V = LCD_FUNCTION_SET_V_HORIZONTAL;
 lcd_function_set_pd_t PD = LCD_FUNCTION_SET_PD_POWER_DOWN;
 
+#ifndef LCD_BIT_BANGING
 static volatile uint8_t hal_lcd_spi_transaction_flag = LCD_SPI_TRANSACTION_DONE;
+#endif /* LCD_BIT_BANGING */
 
 
 void hal_lcd_init(void)

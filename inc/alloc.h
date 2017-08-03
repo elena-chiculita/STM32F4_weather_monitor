@@ -11,33 +11,40 @@
 #define ALLOC_POOL_32_BLOCKS 128
 #define ALLOC_POOL_64_BLOCKS 128
 
+
+typedef struct pool_header_tag
+{
+    size_t lr;
+    bool free;
+} pool_header_t;
+
 typedef struct pool_4_block_tag
 {
-    bool free;
+    pool_header_t header;
     uint8_t data[4];
 } pool_4_block_t;
 
 typedef struct pool_8_block_tag
 {
-    bool free;
+    pool_header_t header;
     uint8_t data[8];
 } pool_8_block_t;
 
 typedef struct pool_16_block_tag
 {
-    bool free;
+    pool_header_t header;
     uint8_t data[16];
 } pool_16_block_t;
 
 typedef struct pool_32_block_tag
 {
-    bool free;
+    pool_header_t header;
     uint8_t data[32];
 } pool_32_block_t;
 
 typedef struct pool_64_block_tag
 {
-    bool free;
+    pool_header_t header;
     uint8_t data[64];
 } pool_64_block_t;
 
@@ -51,12 +58,20 @@ typedef struct pool_tag
 } pool_t;
 
 
+#define ALLOC_POOL_HEADER_OFFSET \
+    FIELD_OFFSET(pool_4_block_t, header)
+#define ALLOC_HEADER_LR_OFFSET \
+    FIELD_OFFSET(pool_header_t, lr)
+#define ALLOC_HEADER_FREE_OFFSET \
+    FIELD_OFFSET(pool_header_t, free)
+
+
 void alloc_init(void);
-void* alloc_get_pool_4_free_block(void);
-void* alloc_get_pool_8_free_block(void);
-void* alloc_get_pool_16_free_block(void);
-void* alloc_get_pool_32_free_block(void);
-void* alloc_get_pool_64_free_block(void);
+void* alloc_get_pool_4_free_block(size_t lr);
+void* alloc_get_pool_8_free_block(size_t lr);
+void* alloc_get_pool_16_free_block(size_t lr);
+void* alloc_get_pool_32_free_block(size_t lr);
+void* alloc_get_pool_64_free_block(size_t lr);
 void* malloc(size_t size);
 void* calloc(size_t num, size_t size);
 void free(void *ptr);

@@ -1,5 +1,5 @@
-#ifndef EMBEDDED_TYPES_H_
-#define EMBEDDED_TYPES_H_
+#ifndef _EMBEDDED_TYPES_H_
+#define _EMBEDDED_TYPES_H_
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -11,4 +11,4 @@
 
 #define NULL ((void *)0)
 
-#endif /* EMBEDDED_TYPES_H_ */
+#endif /* _EMBEDDED_TYPES_H_ */

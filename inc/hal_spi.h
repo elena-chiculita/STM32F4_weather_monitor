@@ -1,5 +1,5 @@
-#ifndef HAL_SPI_H_
-#define HAL_SPI_H_
+#ifndef _HAL_SPI_H_
+#define _HAL_SPI_H_
 
 #include "stm32f407.h"
 
@@ -20,4 +20,4 @@ void hal_spi_init(spi_id_t spi_id,
 void hal_spi_tx(spi_id_t spi_id, uint8_t data);
 uint8_t hal_spi_rx(spi_id_t spi_id);
 
-#endif /* HAL_SPI_H_ */
+#endif /* _HAL_SPI_H_ */

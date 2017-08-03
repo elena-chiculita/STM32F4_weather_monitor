@@ -1,5 +1,5 @@
-#ifndef STM32f407_H_
-#define STM32f407_H_
+#ifndef _STM32f407_H_
+#define _STM32f407_H_
 
 #include "embedded_types.h"
 #include "util.h"
@@ -236,17 +236,15 @@ typedef enum rcc_offset_tag
 
 /* RCC_APB1ENR */
 
+#define RCC_APB1ENR_TYPE volatile uint32_t
+#define RCC_APB1ENR_FIELD_LENGTH 1
+
 typedef enum rcc_apb1enr_offset_tag
 {
     RCC_APB1ENR_SPI3EN_OFFSET = 15,
-    RCC_APB1ENR_SPI2EN_OFFSET = 14
+    RCC_APB1ENR_SPI2EN_OFFSET = 14,
+    RCC_APB1ENR_TIM7EN_OFFSET = 5
 } rcc_apb1enr_offset_t;
-
-typedef enum rcc_apb1enr_length_tag
-{
-    RCC_APB1ENR_SPI3EN_LENGTH = 1,
-    RCC_APB1ENR_SPI2EN_LENGTH = 1
-} rcc_apb1enr_length_t;
 
 /* 15 */
 typedef enum rcc_apb1enr_spi3en_tag
@@ -255,13 +253,10 @@ typedef enum rcc_apb1enr_spi3en_tag
     RCC_APB1ENR_SPI3EN_ENABLE = 1
 } rcc_apb1enr_spi3en_t;
 
-#define RCC_APB1ENR_TYPE volatile uint32_t
-#define RCC_APB1ENR_FIELD_LENGTH 1
-
 #define set_rcc_apb1enr_spi3en(value) \
-    SET_REG((RCC + RCC_APB1ENR_OFFSET), RCC_APB1ENR_TYPE, RCC_APB1ENR_SPI3EN_OFFSET, RCC_APB1ENR_SPI3EN_LENGTH, value)
+    SET_REG((RCC + RCC_APB1ENR_OFFSET), RCC_APB1ENR_TYPE, RCC_APB1ENR_SPI3EN_OFFSET, RCC_APB1ENR_FIELD_LENGTH, value)
 #define get_rcc_apb1enr_spi3en() \
-    GET_REG((RCC + RCC_APB1ENR_OFFSET), RCC_APB1ENR_TYPE, RCC_APB1ENR_SPI3EN_OFFSET, RCC_APB1ENR_SPI3EN_LENGTH)
+    GET_REG((RCC + RCC_APB1ENR_OFFSET), RCC_APB1ENR_TYPE, RCC_APB1ENR_SPI3EN_OFFSET, RCC_APB1ENR_FIELD_LENGTH)
 
 /* 14 */
 typedef enum rcc_apb1enr_spi2en_tag
@@ -271,27 +266,35 @@ typedef enum rcc_apb1enr_spi2en_tag
 } rcc_apb1enr_spi2en_t;
 
 #define set_rcc_apb1enr_spi2en(value) \
-    SET_REG((RCC + RCC_APB1ENR_OFFSET), RCC_APB1ENR_TYPE, RCC_APB1ENR_SPI2EN_OFFSET, RCC_APB1ENR_SPI2EN_LENGTH, value)
+    SET_REG((RCC + RCC_APB1ENR_OFFSET), RCC_APB1ENR_TYPE, RCC_APB1ENR_SPI2EN_OFFSET, RCC_APB1ENR_FIELD_LENGTH, value)
 #define get_rcc_apb1enr_spi2en() \
-    GET_REG((RCC + RCC_APB1ENR_OFFSET), RCC_APB1ENR_TYPE, RCC_APB1ENR_SPI2EN_OFFSET, RCC_APB1ENR_SPI2EN_LENGTH)
+    GET_REG((RCC + RCC_APB1ENR_OFFSET), RCC_APB1ENR_TYPE, RCC_APB1ENR_SPI2EN_OFFSET, RCC_APB1ENR_FIELD_LENGTH)
+
+/* 5 */
+typedef enum rcc_apb1enr_tim7en_tag
+{
+    RCC_APB1ENR_TIM7EN_DISABLE = 0,
+    RCC_APB1ENR_TIM7EN_ENABLE = 1
+} rcc_apb1enr_tim7en_t;
+
+#define set_rcc_apb1enr_tim7en(value) \
+    SET_REG((RCC + RCC_APB1ENR_OFFSET), RCC_APB1ENR_TYPE, RCC_APB1ENR_TIM7EN_OFFSET, RCC_APB1ENR_FIELD_LENGTH, value)
+#define get_rcc_apb1enr_tim7en() \
+    GET_REG((RCC + RCC_APB1ENR_OFFSET), RCC_APB1ENR_TYPE, RCC_APB1ENR_TIM7EN_OFFSET, RCC_APB1ENR_FIELD_LENGTH)
 
 /* RCC_APB2ENR */
+
+#define RCC_APB2ENR_TYPE volatile uint32_t
+#define RCC_APB2ENR_FIELD_LENGTH 1
 
 typedef enum rcc_apb2enr_offset_tag
 {
     RCC_APB2ENR_SPI6EN_OFFSET = 21,
     RCC_APB2ENR_SPI5EN_OFFSET = 20,
+    RCC_APB2ENR_SYSCFGEN_OFFSET = 14,
     RCC_APB2ENR_SPI4EN_OFFSET = 13,
     RCC_APB2ENR_SPI1EN_OFFSET = 12
 } rcc_apb2enr_offset_t;
-
-typedef enum rcc_apb2enr_length_tag
-{
-    RCC_APB2ENR_SPI6EN_LENGTH = 1,
-    RCC_APB2ENR_SPI5EN_LENGTH = 1,
-    RCC_APB2ENR_SPI4EN_LENGTH = 1,
-    RCC_APB2ENR_SPI1EN_LENGTH = 1
-} rcc_apb2enr_length_t;
 
 /* 21 */
 typedef enum rcc_apb2enr_spi6en_tag
@@ -300,12 +303,10 @@ typedef enum rcc_apb2enr_spi6en_tag
     RCC_APB2ENR_SPI6EN_ENABLE = 1
 } rcc_apb2enr_spi6en_t;
 
-#define RCC_APB2ENR_TYPE volatile uint32_t
-
 #define set_rcc_apb2enr_spi6en(value) \
-    SET_REG((RCC + RCC_APB2ENR_OFFSET), RCC_APB2ENR_TYPE, RCC_APB2ENR_SPI6EN_OFFSET, RCC_APB2ENR_SPI6EN_LENGTH, value)
+    SET_REG((RCC + RCC_APB2ENR_OFFSET), RCC_APB2ENR_TYPE, RCC_APB2ENR_SPI6EN_OFFSET, RCC_APB2ENR_FIELD_LENGTH, value)
 #define get_rcc_apb2enr_spi6en() \
-    GET_REG((RCC + RCC_APB2ENR_OFFSET), RCC_APB2ENR_TYPE, RCC_APB2ENR_SPI6EN_OFFSET, RCC_APB2ENR_SPI6EN_LENGTH)
+    GET_REG((RCC + RCC_APB2ENR_OFFSET), RCC_APB2ENR_TYPE, RCC_APB2ENR_SPI6EN_OFFSET, RCC_APB2ENR_FIELD_LENGTH)
 
 /* 20 */
 typedef enum rcc_apb2enr_spi5en_tag
@@ -315,9 +316,21 @@ typedef enum rcc_apb2enr_spi5en_tag
 } rcc_apb2enr_spi5en_t;
 
 #define set_rcc_apb2enr_spi5en(value) \
-    SET_REG((RCC + RCC_APB2ENR_OFFSET), RCC_APB2ENR_TYPE, RCC_APB2ENR_SPI5EN_OFFSET, RCC_APB2ENR_SPI5EN_LENGTH, value)
+    SET_REG((RCC + RCC_APB2ENR_OFFSET), RCC_APB2ENR_TYPE, RCC_APB2ENR_SPI5EN_OFFSET, RCC_APB2ENR_FIELD_LENGTH, value)
 #define get_rcc_apb2enr_spi5en() \
-    GET_REG((RCC + RCC_APB2ENR_OFFSET), RCC_APB2ENR_TYPE, RCC_APB2ENR_SPI5EN_OFFSET, RCC_APB2ENR_SPI5EN_LENGTH)
+    GET_REG((RCC + RCC_APB2ENR_OFFSET), RCC_APB2ENR_TYPE, RCC_APB2ENR_SPI5EN_OFFSET, RCC_APB2ENR_FIELD_LENGTH)
+
+/* 14 */
+typedef enum rcc_apb2enr_syscfgen_tag
+{
+    RCC_APB2ENR_SYSCFGEN_DISABLE = 0,
+    RCC_APB2ENR_SYSCFGEN_ENABLE = 1
+} rcc_apb2enr_syscfgen_t;
+
+#define set_rcc_apb2enr_syscfgen(value) \
+    SET_REG((RCC + RCC_APB2ENR_OFFSET), RCC_APB2ENR_TYPE, RCC_APB2ENR_SYSCFGEN_OFFSET, RCC_APB2ENR_FIELD_LENGTH, value)
+#define get_rcc_apb2enr_syscfgen() \
+    GET_REG((RCC + RCC_APB2ENR_OFFSET), RCC_APB2ENR_TYPE, RCC_APB2ENR_SYSCFGEN_OFFSET, RCC_APB2ENR_FIELD_LENGTH)
 
 /* 13 */
 typedef enum rcc_apb2enr_spi4en_tag
@@ -327,9 +340,9 @@ typedef enum rcc_apb2enr_spi4en_tag
 } rcc_apb2enr_spi4en_t;
 
 #define set_rcc_apb2enr_spi4en(value) \
-    SET_REG((RCC + RCC_APB2ENR_OFFSET), RCC_APB2ENR_TYPE, RCC_APB2ENR_SPI4EN_OFFSET, RCC_APB2ENR_SPI4EN_LENGTH, value)
+    SET_REG((RCC + RCC_APB2ENR_OFFSET), RCC_APB2ENR_TYPE, RCC_APB2ENR_SPI4EN_OFFSET, RCC_APB2ENR_FIELD_LENGTH, value)
 #define get_rcc_apb2enr_spi4en() \
-    GET_REG((RCC + RCC_APB2ENR_OFFSET), RCC_APB2ENR_TYPE, RCC_APB2ENR_SPI4EN_OFFSET, RCC_APB2ENR_SPI4EN_LENGTH)
+    GET_REG((RCC + RCC_APB2ENR_OFFSET), RCC_APB2ENR_TYPE, RCC_APB2ENR_SPI4EN_OFFSET, RCC_APB2ENR_FIELD_LENGTH)
 
 /* 12 */
 typedef enum rcc_apb2enr_spi1en_tag
@@ -339,9 +352,9 @@ typedef enum rcc_apb2enr_spi1en_tag
 } rcc_apb2enr_spi1en_t;
 
 #define set_rcc_apb2enr_spi1en(value) \
-    SET_REG((RCC + RCC_APB2ENR_OFFSET), RCC_APB2ENR_TYPE, RCC_APB2ENR_SPI1EN_OFFSET, RCC_APB2ENR_SPI1EN_LENGTH, value)
+    SET_REG((RCC + RCC_APB2ENR_OFFSET), RCC_APB2ENR_TYPE, RCC_APB2ENR_SPI1EN_OFFSET, RCC_APB2ENR_FIELD_LENGTH, value)
 #define get_rcc_apb2enr_spi1en() \
-    GET_REG((RCC + RCC_APB2ENR_OFFSET), RCC_APB2ENR_TYPE, RCC_APB2ENR_SPI1EN_OFFSET, RCC_APB2ENR_SPI1EN_LENGTH)
+    GET_REG((RCC + RCC_APB2ENR_OFFSET), RCC_APB2ENR_TYPE, RCC_APB2ENR_SPI1EN_OFFSET, RCC_APB2ENR_FIELD_LENGTH)
 
 
 /* SPI */
@@ -872,11 +885,6 @@ typedef enum spi_sr_rxne_tag
 
 #define NVIC 0xE000E100
 
-/* to be used with NVIC_ICERx */
-#define NVIC_IRQ_CLEAR 0
-/* to be used with NVIC_ISERx */
-#define NVIC_IRQ_SET 1
-
 typedef enum irq_id_tag
 {
     IRQ_ID_WWDG = 0,
@@ -1009,25 +1017,32 @@ typedef enum nvic_offset_tag
 #define NVIC_ISER_FIELD_LENGTH 1
 #define NVIC_ISER_TYPE volatile uint32_t
 
-#define set_nvic_iser0(irq_id, value) \
-    SET_REG((NVIC + NVIC_ISER0_OFFSET), NVIC_ISER_TYPE, irq_id, NVIC_ISER_FIELD_LENGTH, value)
+typedef enum nvic_iser_tag
+{
+    NVIC_ISER_DISABLE = 0,
+    NVIC_ISER_ENABLE = 1
+} nvic_iser_tag;
+
+#define set_nvic_iser0(irq_id) \
+    SET_REG((NVIC + NVIC_ISER0_OFFSET), NVIC_ISER_TYPE, irq_id, NVIC_ISER_FIELD_LENGTH, 1)
 #define get_nvic_iser0(irq_id) \
     GET_REG((NVIC + NVIC_ISER0_OFFSET), NVIC_ISER_TYPE, irq_id, NVIC_ISER_FIELD_LENGTH)
 
-#define set_nvic_iser1(irq_id, value) \
-    SET_REG((NVIC + NVIC_ISER1_OFFSET), NVIC_ISER_TYPE, (irq_id - 32), NVIC_ISER_FIELD_LENGTH, value)
+#define set_nvic_iser1(irq_id) \
+    SET_REG((NVIC + NVIC_ISER1_OFFSET), NVIC_ISER_TYPE, (irq_id - 32), NVIC_ISER_FIELD_LENGTH, 1)
 #define get_nvic_iser1(irq_id) \
     GET_REG((NVIC + NVIC_ISER1_OFFSET), NVIC_ISER_TYPE, (irq_id - 32), NVIC_ISER_FIELD_LENGTH)
 
-#define set_nvic_iser2(irq_id, value) \
-    SET_REG((NVIC + NVIC_ISER2_OFFSET), NVIC_ISER_TYPE, (irq_id - 64), NVIC_ISER_FIELD_LENGTH, value)
+#define set_nvic_iser2(irq_id) \
+    SET_REG((NVIC + NVIC_ISER2_OFFSET), NVIC_ISER_TYPE, (irq_id - 64), NVIC_ISER_FIELD_LENGTH, 1)
+
 #define get_nvic_iser2(irq_id) \
     GET_REG((NVIC + NVIC_ISER2_OFFSET), NVIC_ISER_TYPE, (irq_id - 64), NVIC_ISER_FIELD_LENGTH)
 
-#define set_nvic_iser(irq_id, value) \
-    ((irq_id) < 32) ? (set_nvic_iser0(irq_id, value)) : \
-    ((irq_id) < 64) ? (set_nvic_iser1(irq_id, value)) : \
-    ((irq_id) < 81) ? (set_nvic_iser2(irq_id, value)) : ASSERT(FALSE)
+#define set_nvic_iser(irq_id) \
+    ((irq_id) < 32) ? (set_nvic_iser0(irq_id)) : \
+    ((irq_id) < 64) ? (set_nvic_iser1(irq_id)) : \
+    ((irq_id) < 81) ? (set_nvic_iser2(irq_id)) : ASSERT(FALSE)
 
 #define get_nvic_iser(irq_id) \
     ((irq_id) < 32) ? (get_nvic_iser0(irq_id)) : \
@@ -1038,29 +1053,469 @@ typedef enum nvic_offset_tag
 #define NVIC_ICER_FIELD_LENGTH 1
 #define NVIC_ICER_TYPE volatile uint32_t
 
-#define set_nvic_icer0(irq_id, value) \
-    SET_REG((NVIC + NVIC_ICER0_OFFSET), NVIC_ICER_TYPE, irq_id, NVIC_ICER_FIELD_LENGTH, value)
+typedef enum nvic_icer_tag
+{
+    NVIC_ICER_DISABLE = 0,
+    NVIC_ICER_ENABLE = 1
+} nvic_icer_tag;
+
+#define set_nvic_icer0(irq_id) \
+    SET_REG((NVIC + NVIC_ICER0_OFFSET), NVIC_ICER_TYPE, irq_id, NVIC_ICER_FIELD_LENGTH, 1)
 #define get_nvic_icer0(irq_id) \
     GET_REG((NVIC + NVIC_ICER0_OFFSET), NVIC_ICER_TYPE, irq_id, NVIC_ICER_FIELD_LENGTH)
 
-#define set_nvic_icer1(irq_id, value) \
-    SET_REG((NVIC + NVIC_ICER1_OFFSET), NVIC_ICER_TYPE, (irq_id - 32), NVIC_ICER_FIELD_LENGTH, value)
+#define set_nvic_icer1(irq_id) \
+    SET_REG((NVIC + NVIC_ICER1_OFFSET), NVIC_ICER_TYPE, (irq_id - 32), NVIC_ICER_FIELD_LENGTH, 1)
 #define get_nvic_icer1(irq_id) \
     GET_REG((NVIC + NVIC_ICER1_OFFSET), NVIC_ICER_TYPE, (irq_id - 32), NVIC_ICER_FIELD_LENGTH)
 
-#define set_nvic_icer2(irq_id, value) \
-    SET_REG((NVIC + NVIC_ICER2_OFFSET), NVIC_ICER_TYPE, (irq_id - 64), NVIC_ICER_FIELD_LENGTH, value)
+#define set_nvic_icer2(irq_id) \
+    SET_REG((NVIC + NVIC_ICER2_OFFSET), NVIC_ICER_TYPE, (irq_id - 64), NVIC_ICER_FIELD_LENGTH, 1)
 #define get_nvic_icer2(irq_id) \
     GET_REG((NVIC + NVIC_ICER2_OFFSET), NVIC_ICER_TYPE, (irq_id - 64), NVIC_ICER_FIELD_LENGTH)
 
-#define set_nvic_icer(irq_id, value) \
-    ((irq_id) < 32) ? (set_nvic_icer0(irq_id, value)) : \
-    ((irq_id) < 64) ? (set_nvic_icer1(irq_id, value)) : \
-    ((irq_id) < 81) ? (set_nvic_icer2(irq_id, value)) : ASSERT(FALSE)
+#define set_nvic_icer(irq_id) \
+    ((irq_id) < 32) ? (set_nvic_icer0(irq_id)) : \
+    ((irq_id) < 64) ? (set_nvic_icer1(irq_id)) : \
+    ((irq_id) < 81) ? (set_nvic_icer2(irq_id)) : ASSERT(FALSE)
 
 #define get_nvic_icer(irq_id) \
     ((irq_id) < 32) ? (get_nvic_icer0(irq_id)) : \
     ((irq_id) < 64) ? (get_nvic_icer1(irq_id)) : (get_nvic_icer2(irq_id))
+
+/* NVIC_ISPR */
+
+#define NVIC_ISPR_FIELD_LENGTH 1
+#define NVIC_ISPR_TYPE volatile uint32_t
+
+typedef enum nvic_ispr_tag
+{
+    NVIC_ISPR_NOT_PENDING = 0,
+    NVIC_ISPR_PENDING = 1
+} nvic_ispr_tag;
+
+#define set_nvic_ispr0(irq_id) \
+    SET_REG((NVIC + NVIC_ISPR0_OFFSET), NVIC_ISPR_TYPE, irq_id, NVIC_ISPR_FIELD_LENGTH, 1)
+#define get_nvic_ispr0(irq_id) \
+    GET_REG((NVIC + NVIC_ISPR0_OFFSET), NVIC_ISPR_TYPE, irq_id, NVIC_ISPR_FIELD_LENGTH)
+
+#define set_nvic_ispr1(irq_id) \
+    SET_REG((NVIC + NVIC_ISPR1_OFFSET), NVIC_ISPR_TYPE, (irq_id - 32), NVIC_ISPR_FIELD_LENGTH, 1)
+#define get_nvic_ispr1(irq_id) \
+    GET_REG((NVIC + NVIC_ISPR1_OFFSET), NVIC_ISPR_TYPE, (irq_id - 32), NVIC_ISPR_FIELD_LENGTH)
+
+#define set_nvic_ispr2(irq_id) \
+    SET_REG((NVIC + NVIC_ISPR2_OFFSET), NVIC_ISPR_TYPE, (irq_id - 64), NVIC_ISPR_FIELD_LENGTH, 1)
+#define get_nvic_ispr2(irq_id) \
+    GET_REG((NVIC + NVIC_ISPR2_OFFSET), NVIC_ISPR_TYPE, (irq_id - 64), NVIC_ISPR_FIELD_LENGTH)
+
+#define set_nvic_ispr(irq_id) \
+    ((irq_id) < 32) ? (set_nvic_ispr0(irq_id)) : \
+    ((irq_id) < 64) ? (set_nvic_ispr1(irq_id)) : \
+    ((irq_id) < 81) ? (set_nvic_ispr2(irq_id)) : ASSERT(FALSE)
+
+#define get_nvic_ispr(irq_id) \
+    ((irq_id) < 32) ? (get_nvic_ispr0(irq_id)) : \
+    ((irq_id) < 64) ? (get_nvic_ispr1(irq_id)) : (get_nvic_ispr2(irq_id))
+
+/* NVIC_ICPR */
+
+#define NVIC_ICPR_FIELD_LENGTH 1
+#define NVIC_ICPR_TYPE volatile uint32_t
+
+typedef enum nvic_icpr_tag
+{
+    NVIC_ICPR_NOT_PENDING = 0,
+    NVIC_ICPR_PENDING = 1
+} nvic_icpr_tag;
+
+#define set_nvic_icpr0(irq_id) \
+    SET_REG((NVIC + NVIC_ICPR0_OFFSET), NVIC_ICPR_TYPE, irq_id, NVIC_ICPR_FIELD_LENGTH, 1)
+#define get_nvic_icpr0(irq_id) \
+    GET_REG((NVIC + NVIC_ICPR0_OFFSET), NVIC_ICPR_TYPE, irq_id, NVIC_ICPR_FIELD_LENGTH)
+
+#define set_nvic_icpr1(irq_id) \
+    SET_REG((NVIC + NVIC_ICPR1_OFFSET), NVIC_ICPR_TYPE, (irq_id - 32), NVIC_ICPR_FIELD_LENGTH, 1)
+#define get_nvic_icpr1(irq_id) \
+    GET_REG((NVIC + NVIC_ICPR1_OFFSET), NVIC_ICPR_TYPE, (irq_id - 32), NVIC_ICPR_FIELD_LENGTH)
+
+#define set_nvic_icpr2(irq_id) \
+    SET_REG((NVIC + NVIC_ICPR2_OFFSET), NVIC_ICPR_TYPE, (irq_id - 64), NVIC_ICPR_FIELD_LENGTH, 1)
+#define get_nvic_icpr2(irq_id) \
+    GET_REG((NVIC + NVIC_ICPR2_OFFSET), NVIC_ICPR_TYPE, (irq_id - 64), NVIC_ICPR_FIELD_LENGTH)
+
+#define set_nvic_icpr(irq_id) \
+    ((irq_id) < 32) ? (set_nvic_icpr0(irq_id)) : \
+    ((irq_id) < 64) ? (set_nvic_icpr1(irq_id)) : \
+    ((irq_id) < 81) ? (set_nvic_icpr2(irq_id)) : ASSERT(FALSE)
+
+#define get_nvic_icpr(irq_id) \
+    ((irq_id) < 32) ? (get_nvic_icpr0(irq_id)) : \
+    ((irq_id) < 64) ? (get_nvic_icpr1(irq_id)) : (get_nvic_icpr2(irq_id))
+
+
+/* SYSCFG */
+
+#define SYSCFG 0x40013800
+
+typedef enum syscfg_offset_tag
+{
+    SYSCFG_MEMRMP_OFFSET = 0x00,
+    SYSCFG_PMC_OFFSET = 0x04,
+    SYSCFG_EXTICR1_OFFSET = 0x08,
+    SYSCFG_EXTICR2_OFFSET = 0x0C,
+    SYSCFG_EXTICR3_OFFSET = 0x10,
+    SYSCFG_EXTICR4_OFFSET = 0x14,
+    SYSCFG_CMPCR_OFFSET = 0x20
+} syscfg_offset_t;
+
+/* SYSCFG_EXTICR */
+
+#define SYSCFG_EXTICR_FIELD_LENGTH 4
+#define SYSCFG_EXTICR_TYPE volatile uint32_t
+
+#define SYSCFG_EXTICR_GPIO_TO_PORT_BIT(port) \
+   ((port) == GPIOA) ? 0 : \
+   ((port) == GPIOB) ? 1 : \
+   ((port) == GPIOC) ? 2 : \
+   ((port) == GPIOD) ? 3 : \
+   ((port) == GPIOE) ? 4 : \
+   ((port) == GPIOF) ? 5 : \
+   ((port) == GPIOG) ? 6 : \
+   ((port) == GPIOH) ? 7 : 8
+
+#define SYSCFG_EXTICR_PORT_BIT_TO_GPIO(port) \
+   ((port) == 0) ? GPIOA : \
+   ((port) == 1) ? GPIOB : \
+   ((port) == 2) ? GPIOC : \
+   ((port) == 3) ? GPIOD : \
+   ((port) == 4) ? GPIOE : \
+   ((port) == 5) ? GPIOF : \
+   ((port) == 6) ? GPIOG : \
+   ((port) == 7) ? GPIOH : GPIOI
+
+#define set_syscfg_exticr_id(exticr_id_offset, port, line) \
+    SET_REG((SYSCFG + exticr_id_offset), SYSCFG_EXTICR_TYPE, \
+            (line * SYSCFG_EXTICR_FIELD_LENGTH), SYSCFG_EXTICR_FIELD_LENGTH, SYSCFG_EXTICR_GPIO_TO_PORT_BIT(port))
+
+#define set_syscfg_exticr(port, line) \
+    (line <= 3)                    ? (set_syscfg_exticr_id(SYSCFG_EXTICR1_OFFSET, port, line)) : \
+    ((line >= 4) && (line <= 7))   ? (set_syscfg_exticr_id(SYSCFG_EXTICR2_OFFSET, port, (line - 4))) : \
+    ((line >= 8) && (line <= 11))  ? (set_syscfg_exticr_id(SYSCFG_EXTICR3_OFFSET, port, (line - 8))) : \
+    ((line >= 12) && (line <= 15)) ? (set_syscfg_exticr_id(SYSCFG_EXTICR4_OFFSET, port, (line - 11))) : ASSERT(FALSE)
+
+#define get_syscfg_exticr_id(exticr_id_offset, line) \
+    SYSCFG_EXTICR_PORT_BIT_TO_GPIO(GET_REG((SYSCFG + exticr_id_offset), SYSCFG_EXTICR_TYPE, \
+                                           (line * SYSCFG_EXTICR_FIELD_LENGTH), \
+                                           SYSCFG_EXTICR_FIELD_LENGTH))
+
+#define get_syscfg_exticr(line) \
+    (line <= 3)                   ? (get_syscfg_exticr_id(SYSCFG_EXTICR1_OFFSET, line)) : \
+    ((line >= 4) && (line <= 7))  ? (get_syscfg_exticr_id(SYSCFG_EXTICR2_OFFSET, (line - 4))) : \
+    ((line >= 8) && (line <= 11)) ? (get_syscfg_exticr_id(SYSCFG_EXTICR3_OFFSET, (line - 8))) : \
+                                    (get_syscfg_exticr_id(SYSCFG_EXTICR4_OFFSET, (line - 11)))
+
+
+/* EXTI */
+
+#define EXTI 0x40013C00
+#define EXTI_TYPE volatile uint32_t
+#define EXTI_FIELD_LENGTH 1
+
+/* EXTIx OFFSETs */
+typedef enum exti_offset_tag
+{
+    EXTI_IMR_OFFSET = 0x00,
+    EXTI_EMR_OFFSET = 0x04,
+    EXTI_RTSR_OFFSET = 0x08,
+    EXTI_FTSR_OFFSET = 0x0C,
+    EXTI_SWIER_OFFSET = 0x10,
+    EXTI_PR_OFFSET = 0x14
+} exti_offset_t;
+
+#define set_exti_reg(reg_offset, line, val) \
+    SET_REG((EXTI + reg_offset), EXTI_TYPE, line, EXTI_FIELD_LENGTH, val)
+
+#define get_exti_reg(reg_offset, line) \
+    GET_REG((EXTI + reg_offset), EXTI_TYPE, line, EXTI_FIELD_LENGTH)
+
+/* EXTI_IMR */
+
+typedef enum exti_imr_tag
+{
+    EXTI_IMR_MASKED = 0,
+    EXTI_IMR_NOT_MASKED = 1
+} exti_imr_t;
+
+#define set_exti_imr(line, val) set_exti_reg(EXTI_IMR_OFFSET, line, val)
+#define get_exti_imr(line) get_exti_reg(EXTI_IMR_OFFSET, line)
+
+/* EXTI_EMR */
+
+typedef enum exti_emr_tag
+{
+    EXTI_EMR_MASKED = 0,
+    EXTI_EMR_NOT_MASKED = 1
+} exti_emr_t;
+
+#define set_exti_emr(line, val) set_exti_reg(EXTI_EMR_OFFSET, line, val)
+#define get_exti_emr(line) get_exti_reg(EXTI_EMR_OFFSET, line)
+
+/* EXTI_RTSR */
+
+typedef enum exti_rtsr_tag
+{
+    EXTI_RTSR_RISING_TRIGGER_DIS = 0,
+    EXTI_RTSR_RISING_TRIGGER_EN = 1
+} exti_rtsr_t;
+
+#define set_exti_rtsr(line, val) set_exti_reg(EXTI_RTSR_OFFSET, line, val)
+#define get_exti_rtsr(line) get_exti_reg(EXTI_RTSR_OFFSET, line)
+
+/* EXTI_FTSR */
+
+typedef enum exti_ftsr_tag
+{
+    EXTI_FTSR_FALLING_TRIGGER_DIS = 0,
+    EXTI_FTSR_FALLING_TRIGGER_EN = 1
+} exti_ftsr_t;
+
+#define set_exti_ftsr(line, val) set_exti_reg(EXTI_FTSR_OFFSET, line, val)
+#define get_exti_ftsr(line) get_exti_reg(EXTI_FTSR_OFFSET, line)
+
+/* EXTI_PR */
+
+typedef enum exti_pr_tag
+{
+    EXTI_PR_NONE = 0,
+    EXTI_PR_TRIGGERED = 1
+} exti_pr_t;
+
+#define set_exti_pr(line, val) set_exti_reg(EXTI_PR_OFFSET, line, val)
+#define get_exti_pr(line) get_exti_reg(EXTI_PR_OFFSET, line)
+
+
+/* TIM */
+
+typedef enum timer_tag
+{
+    TIM1 = 0x40010000,
+    TIM2 = 0x40000000,
+    TIM3 = 0x40000400,
+    TIM4 = 0x40000800,
+    TIM5 = 0x40000C00,
+    TIM6 = 0x40001000,
+    TIM7 = 0x40001400,
+    TIM8 = 0x40010400,
+    TIM9 = 0x40014000,
+    TIM10 = 0x40014400,
+    TIM11 = 0x40014800,
+    TIM12 = 0x40001800,
+    TIM13 = 0x40001C00,
+    TIM14 = 0x40002000
+} timer_t;
+
+/* TIM1 & TIM8 (advanced-control timers) */
+
+/* TIM2 & TIM5 (general-purpose timers) */
+
+/* TIM9 & TIM14 (general-purpose timers) */
+
+/* TIM6 & TIM7 (basic timers) */
+
+/* TIM6 / TIM7_OFFSETs */
+typedef enum tim_offset_tag
+{
+    TIM_CR1_OFFSET = 0x0,
+    TIM_CR2_OFFSET = 0x4,
+    TIM_DIER_OFFSET = 0xC,
+    TIM_SR_OFFSET = 0x10,
+    TIM_EGR_OFFSET = 0x14,
+    TIM_CNT_OFFSET = 0x24,
+    TIM_PSC_OFFSET = 0x28,
+    TIM_ARR_OFFSET = 0x2C
+} tim_offset_t;
+
+/* TIM_CR1 */
+
+#define TIM_CR1_TYPE volatile uint16_t
+#define TIM_CR1_LENGTH 1
+
+typedef enum tim_cr1_offset_tag
+{
+    TIM_CR1_ARPE_OFFSET = 7,
+    TIM_CR1_OPM_OFFSET = 3,
+    TIM_CR1_URS_OFFSET = 2,
+    TIM_CR1_UDIS_OFFSET = 1,
+    TIM_CR1_CEN_OFFSET = 0
+} tim_cr1_offset_t;
+
+/* 7 */
+typedef enum tim_cr1_arpe_tag
+{
+    TIM_CR1_ARPE_NOT_BUFFERED = 0,
+    TIM_CR1_ARPE_BUFFERED = 1
+} tim_cr1_arpe_t;
+
+#define set_tim_cr1_arpe(timer_id, value) \
+    SET_REG(((timer_id) + TIM_CR1_OFFSET), TIM_CR1_TYPE, TIM_CR1_ARPE_OFFSET, TIM_CR1_LENGTH, value)
+#define get_tim_cr1_arpe(timer_id) \
+    GET_REG(((timer_id) + TIM_CR1_OFFSET), TIM_CR1_TYPE, TIM_CR1_ARPE_OFFSET, TIM_CR1_LENGTH)
+
+/* 3 */
+typedef enum tim_cr1_opm_tag
+{
+    TIM_CR1_OPM_NOT_STOPPED = 0,
+    TIM_CR1_OPM_STOPPED = 1
+} tim_cr1_opm_t;
+
+#define set_tim_cr1_opm(timer_id, value) \
+    SET_REG(((timer_id) + TIM_CR1_OFFSET), TIM_CR1_TYPE, TIM_CR1_OPM_OFFSET, TIM_CR1_LENGTH, value)
+#define get_tim_cr1_opm(timer_id) \
+    GET_REG(((timer_id) + TIM_CR1_OFFSET), TIM_CR1_TYPE, TIM_CR1_OPM_OFFSET, TIM_CR1_LENGTH)
+
+/* 2 */
+typedef enum tim_cr1_urs_tag
+{
+    TIM_CR1_URS_ANY_REQUEST = 0,
+    TIM_CR1_URS_COUNTER_REQUEST = 1
+} tim_cr1_urs_t;
+
+#define set_tim_cr1_urs(timer_id, value) \
+    SET_REG(((timer_id) + TIM_CR1_OFFSET), TIM_CR1_TYPE, TIM_CR1_URS_OFFSET, TIM_CR1_LENGTH, value)
+#define get_tim_cr1_urs(timer_id) \
+    GET_REG(((timer_id) + TIM_CR1_OFFSET), TIM_CR1_TYPE, TIM_CR1_URS_OFFSET, TIM_CR1_LENGTH)
+
+/* 1 */
+typedef enum tim_cr1_udis_tag
+{
+    TIM_CR1_UDIS_UEV_ENABLE = 0,
+    TIM_CR1_UDIS_UEV_DISABLE = 1
+} tim_cr1_udis_t;
+
+#define set_tim_cr1_udis(timer_id, value) \
+    SET_REG(((timer_id) + TIM_CR1_OFFSET), TIM_CR1_TYPE, TIM_CR1_UDIS_OFFSET, TIM_CR1_LENGTH, value)
+#define get_tim_cr1_udis(timer_id) \
+    GET_REG(((timer_id) + TIM_CR1_OFFSET), TIM_CR1_TYPE, TIM_CR1_UDIS_OFFSET, TIM_CR1_LENGTH)
+
+/* 0 */
+typedef enum tim_cr1_cen_tag
+{
+    TIM_CR1_CEN_DISABLE = 0,
+    TIM_CR1_CEN_ENABLE = 1
+} tim_cr1_cen_t;
+
+#define set_tim_cr1_cen(timer_id, value) \
+    SET_REG(((timer_id) + TIM_CR1_OFFSET), TIM_CR1_TYPE, TIM_CR1_CEN_OFFSET, TIM_CR1_LENGTH, value)
+#define get_tim_cr1_cen(timer_id) \
+    GET_REG(((timer_id) + TIM_CR1_OFFSET), TIM_CR1_TYPE, TIM_CR1_CEN_OFFSET, TIM_CR1_LENGTH)
+
+/* TIM_DIER */
+
+#define TIM_DIER_TYPE volatile uint16_t
+#define TIM_DIER_LENGTH 1
+
+typedef enum tim_dier_offset_tag
+{
+    TIM_DIER_UDE_OFFSET = 8,
+    TIM_DIER_UIE_OFFSET = 0
+} tim_dier_offset_t;
+
+/* 8 */
+typedef enum tim_dier_ude_tag
+{
+    TIM_DIER_UDE_DISABLE = 0,
+    TIM_DIER_UDE_ENABLE = 1
+} tim_dier_ude_t;
+
+#define set_tim_dier_ude(timer_id, value) \
+    SET_REG(((timer_id) + TIM_DIER_OFFSET), TIM_DIER_TYPE, TIM_DIER_UDE_OFFSET, TIM_DIER_LENGTH, value)
+#define get_tim_dier_ude(timer_id) \
+    GET_REG(((timer_id) + TIM_DIER_OFFSET), TIM_DIER_TYPE, TIM_DIER_UDE_OFFSET, TIM_DIER_LENGTH)
+
+/* 0 */
+typedef enum tim_dier_uie_tag
+{
+    TIM_DIER_UIE_DISABLE = 0,
+    TIM_DIER_UIE_ENABLE = 1
+} tim_dier_uie_t;
+
+#define set_tim_dier_uie(timer_id, value) \
+    SET_REG(((timer_id) + TIM_DIER_OFFSET), TIM_DIER_TYPE, TIM_DIER_UIE_OFFSET, TIM_DIER_LENGTH, value)
+#define get_tim_dier_uie(timer_id) \
+    GET_REG(((timer_id) + TIM_DIER_OFFSET), TIM_DIER_TYPE, TIM_DIER_UIE_OFFSET, TIM_DIER_LENGTH)
+
+/* TIM_SR */
+
+#define TIM_SR_TYPE volatile uint16_t
+#define TIM_SR_LENGTH 1
+
+typedef enum tim_sr_offset_tag
+{
+    TIM_SR_UIF_OFFSET = 0
+} tim_sr_offset_t;
+
+/* 0 */
+typedef enum tim_sr_uif_tag
+{
+    TIM_SR_UIF_NO_UPDATE = 0,
+    TIM_SR_UIF_PENDING_UPDATE = 1
+} tim_sr_uif_t;
+
+#define set_tim_sr_uif(timer_id, value) \
+    SET_REG(((timer_id) + TIM_SR_OFFSET), TIM_SR_TYPE, TIM_SR_UIF_OFFSET, TIM_SR_LENGTH, value)
+#define get_tim_sr_uif(timer_id) \
+    GET_REG(((timer_id) + TIM_SR_OFFSET), TIM_SR_TYPE, TIM_SR_UIF_OFFSET, TIM_SR_LENGTH)
+
+/* TIM_EGR */
+
+#define TIM_EGR_TYPE volatile uint16_t
+#define TIM_EGR_LENGTH 1
+
+typedef enum tim_egr_offset_tag
+{
+    TIM_EGR_UG_OFFSET = 0
+} tim_egr_offset_t;
+
+/* 0 */
+typedef enum tim_egr_ug_tag
+{
+    TIM_EGR_UG_NONE = 0,
+    TIM_EGR_UG_UPDATE = 1
+} tim_egr_ug_t;
+
+#define set_tim_egr_ug(timer_id, value) \
+    SET_REG(((timer_id) + TIM_EGR_OFFSET), TIM_EGR_TYPE, TIM_EGR_UG_OFFSET, TIM_EGR_LENGTH, value)
+
+/* TIM_CNT */
+
+#define TIM_CNT_TYPE volatile uint16_t
+#define TIM_CNT_LENGTH 16
+
+#define set_tim_cnt(timer_id, value) \
+    SET_REG(((timer_id) + TIM_CNT_OFFSET), TIM_CNT_TYPE, 0, TIM_CNT_LENGTH, value)
+#define get_tim_cnt(timer_id) \
+    GET_REG(((timer_id) + TIM_CNT_OFFSET), TIM_CNT_TYPE, 0, TIM_CNT_LENGTH)
+
+/* TIM_PSC */
+
+#define TIM_PSC_TYPE volatile uint16_t
+#define TIM_PSC_LENGTH 16
+
+#define set_tim_psc(timer_id, value) \
+    SET_REG(((timer_id) + TIM_PSC_OFFSET), TIM_PSC_TYPE, 0, TIM_PSC_LENGTH, value)
+#define get_tim_psc(timer_id) \
+    GET_REG(((timer_id) + TIM_PSC_OFFSET), TIM_PSC_TYPE, 0, TIM_PSC_LENGTH)
+
+/* TIM_ARR */
+
+#define TIM_ARR_TYPE volatile uint16_t
+#define TIM_ARR_LENGTH 16
+
+#define set_tim_arr(timer_id, value) \
+    SET_REG(((timer_id) + TIM_ARR_OFFSET), TIM_ARR_TYPE, 0, TIM_ARR_LENGTH, value)
+#define get_tim_arr(timer_id) \
+    GET_REG(((timer_id) + TIM_ARR_OFFSET), TIM_ARR_TYPE, 0, TIM_ARR_LENGTH)
 
 
 /* CONTROL */
@@ -1079,4 +1534,4 @@ typedef enum control_priv_tag
     CONTROL_PRIV_UNPRIVILEGED = 1
 } control_priv_t;
 
-#endif /* STM32f407_H_ */
+#endif /* _STM32f407_H_ */

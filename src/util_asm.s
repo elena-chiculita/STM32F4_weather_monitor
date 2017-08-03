@@ -390,3 +390,13 @@ delay_counter:
 delay_end:
     bx      lr                  @ return (pc = lr)
     .size   delay, . - delay
+
+    @ Return link register value.
+    @ return - lr
+    @ preserves all registers except r0
+    .global get_lr
+    .type   get_lr, %function
+get_lr:
+    mov     r0, lr              @ copy link register to r0 (r0 = lr)
+    bx      lr                  @ return (pc = lr)
+    .size   get_lr, . - get_lr

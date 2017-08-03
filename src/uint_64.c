@@ -97,10 +97,7 @@ uint_64_t uint_64_div(uint_64_t a, uint_64_t b)
     one.msb = 0;
     one.lsb = 1;
 
-    if ((b.msb == 0) && (b.lsb == 0))
-    {
-        return tmp;
-    }
+    ASSERT((b.msb != 0) || (b.lsb != 0));
 
     for (i = 63; i >= 0; i--)
     {

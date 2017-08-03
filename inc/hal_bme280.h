@@ -1,5 +1,5 @@
-#ifndef HAL_BME280_H_
-#define HAL_BME280_H_
+#ifndef _HAL_BME280_H_
+#define _HAL_BME280_H_
 
 #include "stm32f407.h"
 
@@ -117,4 +117,4 @@ void hal_bme280_write_reg(size_t reg_addr, uint8_t data);
 void hal_bme280_read_reg(size_t reg_addr, size_t size, uint8_t *data_tx, uint8_t *data_rx);
 void hal_bme280_spi_callback(uint8_t *data);
 
-#endif /* HAL_BME280_H_ */
+#endif /* _HAL_BME280_H_ */

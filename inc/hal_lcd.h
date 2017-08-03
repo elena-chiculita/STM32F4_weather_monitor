@@ -1,5 +1,5 @@
-#ifndef HAL_LCD_H_
-#define HAL_LCD_H_
+#ifndef _HAL_LCD_H_
+#define _HAL_LCD_H_
 
 #include "stm32f407.h"
 
@@ -115,9 +115,10 @@ void hal_lcd_send_command_bias_system(uint8_t val);
 void hal_lcd_send_command_set_vop(uint8_t vop);
 void hal_lcd_data_serializer(uint8_t *buf, uint16_t size, lcd_dc_t dc);
 
-#ifndef LCD_BIT_BANGING
 
 #define LCD_SPI_ID SPI2
+
+#ifndef LCD_BIT_BANGING
 
 /* to be used with hal_lcd_spi_transaction_flag */
 #define LCD_SPI_TRANSACTION_IN_PROGRESS 0
@@ -127,4 +128,4 @@ void hal_lcd_spi_callback(uint8_t *data);
 
 #endif /* LCD_BIT_BANGING */
 
-#endif /* HAL_LCD_H_ */
+#endif /* _HAL_LCD_H_ */

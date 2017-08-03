@@ -30,11 +30,17 @@ SOURCES_CC_COMMON = core_irq_handlers.c \
                     hal_bme280.c \
                     bme280.c \
                     int_64.c \
-                    uint_64.c
+                    uint_64.c \
+                    exti.c \
+                    gpio_interrupt.c \
+                    timer.c \
+                    button.c \
+                    weather_monitor.c
 SOURCES_CC_BUILD = main.c
 SOURCES_CC_TEST = main_test.c \
                   util_test.c \
-                  int_64_test.c
+                  int_64_test.c \
+                  list_test.c
 SOURCES_AS = startup.s \
              util_asm.s
 

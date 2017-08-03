@@ -1,5 +1,5 @@
-#ifndef UTIL_H_
-#define UTIL_H_
+#ifndef _UTIL_H_
+#define _UTIL_H_
 
 #include <stddef.h>
 
@@ -9,7 +9,7 @@
 #define ASSERT(expr) \
     (!(expr)) ? cpu_halt(__FILE__, __LINE__, #expr) : UNUSED(expr)
 
-#define FIELD_OFFSET(s, x) (size_t)(&(((s *)0)->x))
+#define FIELD_OFFSET(s, x) ((size_t)(&(((s *)0)->x)))
 
 #define MIN(a, b) (((a) < (b)) ? (a) : (b))
 #define MAX(a, b) (((a) > (b)) ? (a) : (b))
@@ -29,5 +29,6 @@ size_t strlen(const char *str);
 uint32_t core_reg_get_control(void);
 void core_reg_set_control(uint32_t val);
 void delay(uint32_t ms);
+size_t get_lr(void);
 
-#endif /* UTIL_H_ */
+#endif /* _UTIL_H_ */

@@ -209,7 +209,7 @@ void spi_txrx(uint8_t *data_tx, uint8_t *data_rx, size_t size,
     ASSERT(spi_store != NULL);
     ASSERT(spi_store->is_init == TRUE);
 
-    spi_transaction = calloc(1, sizeof(spi_transaction_t));
+    spi_transaction = malloc(sizeof(spi_transaction_t));
     ASSERT(spi_transaction != NULL);
     spi_transaction->data_rx = data_rx;
     spi_transaction->data_tx = data_tx;
@@ -218,7 +218,7 @@ void spi_txrx(uint8_t *data_tx, uint8_t *data_rx, size_t size,
     spi_transaction->nss_port = spi_device->nss_port;
     spi_transaction->nss_pin = spi_device->nss_pin;
 
-    list_add_last((list_t *)&spi_store->list, (list_elem_t *)&spi_transaction->elem);
+    list_add_last((list_t *)&spi_store->list, &spi_transaction->elem);
 
     /* enable interrupts */
     _enable_irq();

@@ -18,3 +18,27 @@ void led_off(gpio_port_t port, uint8_t pin)
     gpio_clear(port, pin);
 }
 
+void led_toggle(gpio_port_t port, uint8_t pin)
+{
+    gpio_toggle(port, pin);
+}
+
+void led_green_toggle_callback(void)
+{
+    led_toggle(LED_GREEN_PORT, LED_GREEN_PIN);
+}
+
+void led_orange_toggle_callback(void)
+{
+    led_toggle(LED_ORANGE_PORT, LED_ORANGE_PIN);
+}
+
+void led_red_toggle_callback(void)
+{
+    led_toggle(LED_RED_PORT, LED_RED_PIN);
+}
+
+void led_blue_toggle_callback(void)
+{
+    led_toggle(LED_BLUE_PORT, LED_BLUE_PIN);
+}

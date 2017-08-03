@@ -1,5 +1,5 @@
-#ifndef SPI_H_
-#define SPI_H_
+#ifndef _SPI_H_
+#define _SPI_H_
 
 #include "hal_spi.h"
 
@@ -24,4 +24,4 @@ void _spi1_handler(uint32_t *stack);
 void _spi2_handler(uint32_t *stack);
 void _spi3_handler(uint32_t *stack);
 
-#endif /* SPI_H_ */
+#endif /* _SPI_H_ */

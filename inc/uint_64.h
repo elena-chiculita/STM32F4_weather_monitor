@@ -1,5 +1,5 @@
-#ifndef UINT_64_H_
-#define UINT_64_H_
+#ifndef _UINT_64_H_
+#define _UINT_64_H_
 
 #include "embedded_types.h"
 #include "64bit.h"
@@ -14,4 +14,4 @@ uint_64_t uint_64_sub(uint_64_t a, uint_64_t b);
 uint_64_t uint_64_div(uint_64_t a, uint_64_t b);
 int8_t uint_64_cmp(uint_64_t a, uint_64_t b);
 
-#endif /* UINT_64_H_ */
+#endif /* _UINT_64_H_ */

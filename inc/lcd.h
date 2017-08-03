@@ -1,5 +1,5 @@
-#ifndef LCD_H_
-#define LCD_H_
+#ifndef _LCD_H_
+#define _LCD_H_
 
 #include "embedded_types.h"
 
@@ -17,4 +17,4 @@ void lcd_line(int16_t x0, int16_t y0, int16_t x1, int16_t y1);
 void lcd_circle(int16_t x0, int16_t y0, uint8_t r);
 void lcd_refresh(void);
 
-#endif /* LCD_H_ */
+#endif /* _LCD_H_ */

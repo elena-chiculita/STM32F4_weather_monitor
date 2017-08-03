@@ -17,9 +17,15 @@ void gpio_init(gpio_port_t port, uint8_t pin, gpio_moder_t moder,
 bool gpio_get(gpio_port_t port, uint8_t pin)
 {
     ASSERT(pin <= 15);
-    ASSERT(get_gpio_moder(port, pin) == GPIO_MODER_INPUT);
 
-    return get_gpio_idr(port, pin);
+    if (get_gpio_moder(port, pin) == GPIO_MODER_INPUT)
+    {
+        return get_gpio_idr(port, pin);
+    }
+    else
+    {
+        return get_gpio_odr(port, pin);
+    }
 }
 
 void gpio_set(gpio_port_t port, uint8_t pin)
@@ -47,3 +53,17 @@ void gpio_set_value(gpio_port_t port, uint8_t pin, uint8_t value)
     set_gpio_bsrr(port, pin, (value) ? GPIO_BSRR_SET : GPIO_BSRR_RESET);
 }
 
+void gpio_toggle(gpio_port_t port, uint8_t pin)
+{
+    ASSERT(pin <= 15);
+    ASSERT(get_gpio_moder(port, pin) == GPIO_MODER_OUTPUT);
+
+    if (gpio_get(port, pin))
+    {
+        gpio_clear(port, pin);
+    }
+    else
+    {
+        gpio_set(port, pin);
+    }
+}
