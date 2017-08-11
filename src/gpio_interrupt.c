@@ -72,7 +72,7 @@ void gpio_interrupt_register(gpio_port_t port, uint8_t pin, gpio_interrupt_edge_
 
     if (found == FALSE)
     {
-        exti_enable_line(port, pin);
+        exti_enable_line(port, pin, mask);
     }
 
     /* enable interrupts */

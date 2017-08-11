@@ -103,6 +103,7 @@ typedef enum bme280_status_tag
     bme280_status_done = 1
 } bme280_status_t;
 
+
 void hal_bme280_init(void);
 void hal_bme280_reset(void);
 uint8_t hal_bme280_get_id(void);

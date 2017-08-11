@@ -9,9 +9,9 @@
 typedef enum gpio_interrupt_edge_mask_tag
 {
     GPIO_INTERRUPT_NONE = 0,
-    GPIO_INTERRUPT_RISING = 1,
-    GPIO_INTERRUPT_FALLING = 2,
-    GPIO_INTERRUPT_ANY = 3
+    GPIO_INTERRUPT_RISING = 1 << 0,
+    GPIO_INTERRUPT_FALLING = 1 << 1,
+    GPIO_INTERRUPT_ANY = GPIO_INTERRUPT_RISING | GPIO_INTERRUPT_FALLING
 } gpio_interrupt_edge_mask_t;
 
 typedef void (*gpio_interrupt_callback_t)(gpio_port_t, uint8_t); 

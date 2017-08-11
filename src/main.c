@@ -15,6 +15,16 @@
 
 int main(void)
 {
+    led_init(LED_GREEN_PORT, LED_GREEN_PIN);
+    led_init(LED_ORANGE_PORT, LED_ORANGE_PIN);
+    led_init(LED_RED_PORT, LED_RED_PIN);
+    led_init(LED_BLUE_PORT, LED_BLUE_PIN);
+
+    led_off(LED_GREEN_PORT, LED_GREEN_PIN);
+    led_off(LED_ORANGE_PORT, LED_ORANGE_PIN);
+    led_off(LED_RED_PORT, LED_RED_PIN);
+    led_off(LED_BLUE_PORT, LED_BLUE_PIN);
+
     alloc_init();
     timer_init(TIM7);
     gpio_interrupt_init();
@@ -24,11 +34,6 @@ int main(void)
     lcd_init();
     lcd_backlight_on();
     lcd_set_contrast(60);
-
-    led_init(LED_GREEN_PORT, LED_GREEN_PIN);
-    led_init(LED_ORANGE_PORT, LED_ORANGE_PIN);
-    led_init(LED_RED_PORT, LED_RED_PIN);
-    led_init(LED_BLUE_PORT, LED_BLUE_PIN);
 
     if (core_reg_get_control() == CONTROL_PRIV_UNPRIVILEGED)
     {
@@ -40,13 +45,6 @@ int main(void)
         /* privileged mode */
         led_on(LED_GREEN_PORT, LED_GREEN_PIN);
     }
-
-    delay(1000);
-
-    led_off(LED_GREEN_PORT, LED_GREEN_PIN);
-    led_off(LED_ORANGE_PORT, LED_ORANGE_PIN);
-    led_off(LED_RED_PORT, LED_RED_PIN);
-    led_off(LED_BLUE_PORT, LED_BLUE_PIN);
 
     timer_register(TIM7, LED_GREEN_TIMEOUT_MS, TIMER_RESCHEDULE_PERIOD, TIMER_REGISTER, led_green_toggle_callback);
     timer_register(TIM7, LED_ORANGE_TIMEOUT_MS, TIMER_RESCHEDULE_PERIOD, TIMER_REGISTER, led_orange_toggle_callback);

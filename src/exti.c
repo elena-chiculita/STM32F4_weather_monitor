@@ -1,21 +1,22 @@
 #include "exti.h"
 #include "hal_nvic.h"
-#include "gpio_interrupt.h"
 #include "timer.h"
-#include "led.h"
 
 
 extern volatile list_t gpio_interrupt_list;
 
 
-void exti_enable_line(gpio_port_t port, uint8_t line)
+void exti_enable_line(gpio_port_t port, uint8_t line, gpio_interrupt_edge_mask_t mask)
 {
     set_rcc_apb2enr_syscfgen(RCC_CLK_EN);
     set_syscfg_exticr(port, line);
     set_exti_imr(line, EXTI_IMR_NOT_MASKED);
     set_exti_emr(line, EXTI_EMR_NOT_MASKED);
-    set_exti_rtsr(line, EXTI_RTSR_RISING_TRIGGER_EN);
-    set_exti_ftsr(line, EXTI_FTSR_FALLING_TRIGGER_DIS);
+
+    set_exti_rtsr(line, (mask & GPIO_INTERRUPT_RISING) ?
+                  EXTI_RTSR_RISING_TRIGGER_EN : EXTI_RTSR_RISING_TRIGGER_DIS);
+    set_exti_ftsr(line, (mask & GPIO_INTERRUPT_FALLING) ?
+                  EXTI_FTSR_FALLING_TRIGGER_EN : EXTI_FTSR_FALLING_TRIGGER_DIS);
 
     /* disable interrupts */
     _disable_irq();

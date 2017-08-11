@@ -1,7 +1,6 @@
 #include "stm32f407.h"
 #include "timer.h"
 #include "hal_nvic.h"
-#include "led.h"
 #include "list.h"
 #include "alloc.h"
 
@@ -58,6 +57,7 @@ void timer_register(timer_t timer, uint16_t reschedule_period_ms, timer_reschedu
     timer_interrupt_t *new;
     list_elem_t *elem;
     bool first_cb;
+    size_t update_ms_left;
 
     ASSERT(fn != NULL);
 
@@ -76,7 +76,17 @@ void timer_register(timer_t timer, uint16_t reschedule_period_ms, timer_reschedu
         {
             if (((timer_interrupt_t *)elem)->reschedule_period_ms != reschedule_period_ms)
             {
+                list_remove((list_t *)&timer_interrupt_list, elem);
+                update_ms_left = get_tim_cnt(timer);
+                list_parse((list_t *)&timer_interrupt_list, timer_interrupt_update, &update_ms_left);
+
                 ((timer_interrupt_t *)elem)->reschedule_period_ms = reschedule_period_ms;
+                ((timer_interrupt_t *)elem)->reschedule_period_ms_left = reschedule_period_ms;
+                list_add_ordered((list_t *)&timer_interrupt_list, elem, timer_interrupt_find_pos);
+
+                elem = list_get_first((list_t *)&timer_interrupt_list);
+                ASSERT(elem != NULL);
+                timer_reschedule(timer, ((timer_interrupt_t *)elem)->reschedule_period_ms_left);
             }
         }
 
@@ -111,21 +121,24 @@ void timer_register(timer_t timer, uint16_t reschedule_period_ms, timer_reschedu
         new->reschedule_period_ms = reschedule_period_ms;
         new->reschedule_period_ms_left = reschedule_period_ms;
         new->fn = fn;
-        list_add_ordered((list_t *)&timer_interrupt_list, (list_elem_t *)new, timer_interrupt_find_pos);
 
         if (first_cb)
         {
-            timer_reschedule(timer, reschedule_period_ms);
+            list_add_ordered((list_t *)&timer_interrupt_list, &new->elem, timer_interrupt_find_pos);
+
+            timer_reschedule(timer, new->reschedule_period_ms_left);
             set_tim_cr1_cen(timer, TIM_CR1_CEN_ENABLE);
         }
         else
         {
+            update_ms_left = get_tim_cnt(timer);
+            list_parse((list_t *)&timer_interrupt_list, timer_interrupt_update, &update_ms_left);
+
+            list_add_ordered((list_t *)&timer_interrupt_list, &new->elem, timer_interrupt_find_pos);
+
             elem = list_get_first((list_t *)&timer_interrupt_list);
             ASSERT(elem != NULL);
-            if (new->reschedule_period_ms_left < ((timer_interrupt_t *)elem)->reschedule_period_ms_left)
-            {
-                timer_reschedule(timer, new->reschedule_period_ms_left);
-            }
+            timer_reschedule(timer, ((timer_interrupt_t *)elem)->reschedule_period_ms_left);
         }
     }
 
@@ -167,27 +180,9 @@ int timer_interrupt_find_pos(list_elem_t *elem, list_elem_t *new)
 
 void timer_interrupt_update(list_elem_t *elem, void *arg)
 {
-    timer_interrupt_t *tm;
-
     ASSERT((elem != NULL) && (arg != NULL));
 
-    tm = (timer_interrupt_t *)elem;
-
-    if (tm->reschedule == TIMER_RESCHEDULE_SINGLE)
-    {
-        timer_callback_t fn;
-
-        fn = tm->fn;
-        list_remove((list_t *)&timer_interrupt_list, elem);
-        free(elem);
-
-        ASSERT(fn != NULL);
-        fn();
-    }
-    else
-    {
-        tm->reschedule_period_ms_left -= *((uint16_t *)arg);
-    }
+    ((timer_interrupt_t *)elem)->reschedule_period_ms_left -= *((uint16_t *)arg);
 }
 
 uint16_t timer_set_psc(timer_t timer)
@@ -206,8 +201,9 @@ uint16_t timer_set_psc(timer_t timer)
 void _tim_handler(timer_t timer)
 {
     list_elem_t *elem;
-    uint16_t reschedule_period_ms_left;
+    size_t reschedule_period_ms_left;
     timer_interrupt_t *tm;
+    timer_callback_t fn;
 
     elem = list_get_first((list_t *)&timer_interrupt_list);
     if (elem == NULL)
@@ -229,14 +225,23 @@ void _tim_handler(timer_t timer)
         }
 
         tm = (timer_interrupt_t *)elem;
+        fn = tm->fn;
+
         if (tm->reschedule_period_ms_left == 0)
         {
             tm->reschedule_period_ms_left = tm->reschedule_period_ms;
             list_remove((list_t *)&timer_interrupt_list, elem);
-            list_add_ordered((list_t *)&timer_interrupt_list, elem, timer_interrupt_find_pos);
+            if (tm->reschedule == TIMER_RESCHEDULE_PERIOD)
+            {
+                list_add_ordered((list_t *)&timer_interrupt_list, elem, timer_interrupt_find_pos);
+            }
+            else
+            {
+                free(elem);
+            }
 
-            ASSERT(tm->fn != NULL);
-            tm->fn();
+            ASSERT(fn != NULL);
+            fn();
         }
         else
         {
