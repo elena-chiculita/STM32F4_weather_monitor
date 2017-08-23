@@ -3,6 +3,7 @@
 #include "hal_nvic.h"
 #include "list.h"
 #include "alloc.h"
+#include "util.h"
 
 
 volatile list_t timer_interrupt_list;
@@ -74,20 +75,17 @@ void timer_register(timer_t timer, uint16_t reschedule_period_ms, timer_reschedu
         }
         else
         {
-            if (((timer_interrupt_t *)elem)->reschedule_period_ms != reschedule_period_ms)
-            {
-                list_remove((list_t *)&timer_interrupt_list, elem);
-                update_ms_left = get_tim_cnt(timer);
-                list_parse((list_t *)&timer_interrupt_list, timer_interrupt_update, &update_ms_left);
+            list_remove((list_t *)&timer_interrupt_list, elem);
+            update_ms_left = get_tim_cnt(timer);
+            list_parse((list_t *)&timer_interrupt_list, timer_interrupt_update, &update_ms_left);
 
-                ((timer_interrupt_t *)elem)->reschedule_period_ms = reschedule_period_ms;
-                ((timer_interrupt_t *)elem)->reschedule_period_ms_left = reschedule_period_ms;
-                list_add_ordered((list_t *)&timer_interrupt_list, elem, timer_interrupt_find_pos);
+            ((timer_interrupt_t *)elem)->reschedule_period_ms = reschedule_period_ms;
+            ((timer_interrupt_t *)elem)->reschedule_period_ms_left = reschedule_period_ms;
+            list_add_ordered((list_t *)&timer_interrupt_list, elem, timer_interrupt_find_pos);
 
-                elem = list_get_first((list_t *)&timer_interrupt_list);
-                ASSERT(elem != NULL);
-                timer_reschedule(timer, ((timer_interrupt_t *)elem)->reschedule_period_ms_left);
-            }
+            elem = list_get_first((list_t *)&timer_interrupt_list);
+            ASSERT(elem != NULL);
+            timer_reschedule(timer, ((timer_interrupt_t *)elem)->reschedule_period_ms_left);
         }
 
         /* enable interrupts */

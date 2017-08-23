@@ -1,96 +1,61 @@
 #include "embedded_types.h"
 #include "stm32f407.h"
-#include "led.h"
-#include "gpio.h"
-#include "hal_lcd.h"
-#include "lcd.h"
-#include "util.h"
-#include "util_test.h"
-#include "int_64_test.h"
-#include "list_test.h"
-#include "lib.h"
 #include "alloc.h"
 #include "spi.h"
+#include "hal_lcd.h"
+#include "lcd.h"
+#include "lib.h"
+#include "lib_test.h"
+#include "int_64_test.h"
+#include "list_test.h"
+#include "util.h"
 
+
+typedef struct test_matrix_tag
+{
+    uint32_t (*fn)();
+    const char *name;
+} test_matrix_t;
+
+
+test_matrix_t test[] = {
+    {memcmp_test, "memcmp"},
+    {memset_test, "memset"},
+    {memcpy_test, "memcpy"},
+    {memmove_test, "memmove"},
+    {int_64_conversions_test, "64<->32 conv."},
+    {int_64_math_test, "int64 math"},
+    {int_64_bitwise_test, "int64 bit"},
+    {list_test, "list"},
+    {snprintf_test, "snprintf"}
+};
 
 uint32_t testId;
 
 
 int main(void)
 {
+    uint32_t i;
+
     alloc_init();
-
     spi_init(LCD_SPI_ID);
-
     lcd_init();
     hal_lcd_backlight_on();
     lcd_set_contrast(60);
 
-    printf("memcmp ");
-    if (memcmp_test() != PASS)
+    for (i = 0; i < (sizeof(test) / sizeof(test[0])); i++)
     {
-        printf("FAILED %d\n", testId);
-        goto mainloop;
-    }
-    printf("OK\n");
+        printf("%s ", test[i].name);
 
-    printf("memset ");
-    if (memset_test() != PASS)
-    {
-        printf("FAILED %d\n", testId);
-        goto mainloop;
-    }
-    printf("OK\n");
+        if ((*(test[i].fn))() != PASS)
+        {
+            printf("FAILED %d\n", testId);
+            goto mainloop;
+        }
 
-    printf("memcpy ");
-    if (memcpy_test() != PASS)
-    {
-        printf("FAILED %d\n", testId);
-        goto mainloop;
+        printf("OK\n");
+        delay(1000);
     }
-    printf("OK\n");
-
-#if 0
-    printf("memmove ");
-    if (memmove_test() != PASS)
-    {
-        printf("FAILED %d\n", testId);
-        goto mainloop;
-    }
-    printf("OK\n");
-#endif
-
-    printf("64<->32 conv. ");
-    if (int_64_conversions_test() != PASS)
-    {
-        printf("FAILED %d\n", testId);
-        goto mainloop;
-    }
-    printf("OK\n");
-
-    printf("int64 math ");
-    if (int_64_math_test() != PASS)
-    {
-        printf("FAILED %d\n", testId);
-        goto mainloop;
-    }
-    printf("OK\n");
-
-    printf("int64 bit ");
-    if (int_64_bitwise_test() != PASS)
-    {
-        printf("FAILED %d\n", testId);
-        goto mainloop;
-    }
-    printf("OK\n");
-
-    printf("list ");
-    if (list_test() != PASS)
-    {
-        printf("FAILED %d\n", testId);
-        goto mainloop;
-    }
-    printf("OK\n");
 
 mainloop:
 
@@ -98,4 +63,3 @@ mainloop:
 
     return 0;
 }
-

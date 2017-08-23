@@ -1,6 +1,7 @@
 #include "bme280.h"
 #include "int_64.h"
 #include "lib.h"
+#include "util.h"
 
 
 static uint8_t bme280_calib_00_25[BME280_MEMORY_SIZE_CALIB_00_25];

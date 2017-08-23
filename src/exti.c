@@ -1,9 +1,7 @@
 #include "exti.h"
 #include "hal_nvic.h"
 #include "timer.h"
-
-
-extern volatile list_t gpio_interrupt_list;
+#include "util.h"
 
 
 void exti_enable_line(gpio_port_t port, uint8_t line, gpio_interrupt_edge_mask_t mask)
@@ -29,35 +27,12 @@ void exti_enable_line(gpio_port_t port, uint8_t line, gpio_interrupt_edge_mask_t
 
 void exti_handler(uint8_t line)
 {
-    gpio_port_t port;
-    gpio_interrupt_line_t find_line;
-    list_elem_t *elem;
-    gpio_interrupt_callback_t fn;
-
     /* disable interrupts */
     _disable_irq();
 
     set_exti_pr(line, EXTI_PR_TRIGGERED);
 
-    port = get_syscfg_exticr(line);
-    find_line.port = port;
-    find_line.pin = line;
-
-    elem = NULL;
-
-    do
-    {
-        elem = list_get_elems((list_t *)&gpio_interrupt_list, elem,
-                              gpio_interrupt_find_line, (void *)&find_line);
-        if (elem == NULL)
-        {
-            break;
-        }
-
-        fn = ((gpio_interrupt_t *)elem)->fn;
-        ASSERT(fn != NULL);
-        fn(((gpio_interrupt_t *)elem)->port, ((gpio_interrupt_t *)elem)->pin);
-    } while (elem);
+    gpio_interrupt_update(get_syscfg_exticr(line), line);
 
     /* enable interrupts */
     _enable_irq();

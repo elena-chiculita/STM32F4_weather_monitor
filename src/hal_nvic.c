@@ -1,4 +1,5 @@
 #include "hal_nvic.h"
+#include "util.h"
 
 
 void hal_nvic_enable(irq_id_t irq_id)

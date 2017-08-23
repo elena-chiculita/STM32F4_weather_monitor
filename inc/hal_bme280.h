@@ -1,6 +1,7 @@
 #ifndef _HAL_BME280_H_
 #define _HAL_BME280_H_
 
+#include <stddef.h>
 #include "stm32f407.h"
 
 
@@ -15,6 +16,8 @@
 
 #define BME280_REG_WRITE_MASK 0x7F
 #define BME280_REG_READ_MASK 0x7F
+
+#define BME280_RESET_VAL 0xB6
 
 #define hum_lsb 0xFE
 #define hum_msb 0xFD

@@ -1,6 +1,7 @@
 #ifndef _SPI_H_
 #define _SPI_H_
 
+#include <stddef.h>
 #include "hal_spi.h"
 
 

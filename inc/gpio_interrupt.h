@@ -25,15 +25,18 @@ typedef struct gpio_interrupt_tag
     gpio_interrupt_callback_t fn;
 } gpio_interrupt_t;
 
-typedef struct gpio_interrupt_line_tag
+typedef struct gpio_interrupt_find_tag
 {
     gpio_port_t port;
     uint8_t pin;
-} gpio_interrupt_line_t;
+    gpio_interrupt_edge_mask_t mask;
+} gpio_interrupt_find_t;
 
 
 void gpio_interrupt_init(void);
-void gpio_interrupt_register(gpio_port_t port, uint8_t pin, gpio_interrupt_edge_mask_t mask, gpio_interrupt_callback_t fn);
-bool gpio_interrupt_find_line(list_elem_t *elem, void *arg);
+void gpio_interrupt_register(gpio_port_t port, uint8_t pin, gpio_interrupt_edge_mask_t mask,
+                             gpio_interrupt_callback_t fn);
+void gpio_interrupt_update(gpio_port_t port, uint8_t pin);
+bool gpio_interrupt_find_elem(list_elem_t *elem, void *arg);
 
 #endif /* _GPIO_INTERRUPT_H_ */

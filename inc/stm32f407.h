@@ -2,7 +2,6 @@
 #define _STM32f407_H_
 
 #include "embedded_types.h"
-#include "util.h"
 
 
 #define FIELD_MASK(len) ((1U << (len)) - 1)

@@ -1,5 +1,6 @@
 #include "lcd.h"
 #include "hal_lcd.h"
+#include "lib.h"
 #include "util.h"
 #include "letters.c"
 

@@ -1,6 +1,8 @@
 #include "hal_bme280.h"
-#include "spi.h"
 #include "alloc.h"
+#include "spi.h"
+#include "lib.h"
+#include "util.h"
 
 
 static volatile uint8_t hal_bme280_spi_transaction_flag = BME280_SPI_TRANSACTION_DONE;
@@ -15,7 +17,7 @@ void hal_bme280_init(void)
 
 void hal_bme280_reset(void)
 {
-    hal_bme280_write_reg(reset, 0xB6);
+    hal_bme280_write_reg(reset, BME280_RESET_VAL);
 }
 
 uint8_t hal_bme280_get_id(void)

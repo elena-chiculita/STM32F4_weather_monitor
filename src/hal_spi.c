@@ -1,4 +1,5 @@
 #include "hal_spi.h"
+#include "util.h"
 
 
 void hal_spi_init(spi_id_t spi_id,
