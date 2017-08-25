@@ -74,6 +74,8 @@ memcpy:
     push    {r6}                @ preserve r6
     cmp     r2, #0              @ compare number of bytes with 0
     beq     memcpy_end          @ if number of bytes is 0 go straight to end
+    cmp     r0, r1              @ compare destination and source addresses
+    beq     memcpy_end          @ if these are equal go straight to end
     mov     r3, #0              @ set offset to 0
     cmp     r2, #3              @ compare number of bytes with 3
     bls     memcpy_b            @ if less than or equal to 3 jump to copy bytes
@@ -176,16 +178,33 @@ memcpy_s_end:
     @ r1 - source buffer address
     @ r2 - number of bytes to copy
     @ return r0 - destination buffer address
-    @ preserves all registers except r0, r3
+    @ preserves all registers except r0
     .global memmove
     .type   memmove, %function
 memmove:
     push    {r4}                @ preserve r4
     push    {r5}                @ preserve r5
     push    {r6}                @ preserve r6
+    push    {r7}                @ preserve r7
     cmp     r2, #0              @ compare number of bytes with 0
     beq     memmove_end         @ if number of bytes is 0 go straight to end
-    mov     r3, r2              @ set offset to number of bytes
+    cmp     r0, r1              @ compare destination and source addresses
+    beq     memmove_end         @ if destination = source go straight to end
+    bmi     memmove_bmi         @ if destination < source    
+    mov     r3, #255            @ r3 = 0xFF
+    mov     r7, #255            @ r7 = 0xFF
+    lsl     r7, r7, #8          @ r7 <<= 8 (r7 = 0xFF00)
+    orr     r7, r3, r7          @ r7 |= r3 (r7 = 0xFFFF)
+    lsl     r7, r7, #8          @ r7 <<= 8 (r7 = 0xFFFF00)
+    orr     r7, r3, r7          @ r7 |= r3 (r7 = 0xFFFFFF)
+    lsl     r7, r7, #8          @ r7 <<= 8 (r7 = 0xFFFFFF00)
+    orr     r7, r3, r7          @ r7 |= r3 (r7 = 0xFFFFFFFF = -1)
+    mov     r3, r2              @ set offset to number of bytes and decrement to 0
+    b       memmove_align_diff
+memmove_bmi:
+    mov     r7, #1              @ r7 = 1
+    mov     r3, #0              @ set offset to 0 and increment until equal to number of bytes
+memmove_align_diff:
     cmp     r2, #3              @ compare number of bytes with 3
     bls     memmove_b           @ if less than or equal to 3 bytes to copy jump to copy bytes
     mov     r4, r0              @ temporary copy of destination address (because of AND syntax : Rd = Rd AND Rn)
@@ -195,7 +214,7 @@ memmove:
     and     r5, r5, r6          @ r5 = r1 & b11 ; (number of bytes to the next source aligned address)
     add     r6, r4, r5          @ add the alignments of both destination and source
     cmp     r6, #0              @ compare result with 0
-    beq     memmove_w           @ if result is 0 then both destination and source are aligned
+    beq     memmove_w_init      @ if result is 0 then both destination and source are aligned
                                 @ jump to copy words
                                 @ r2 >= 4 ; (at this point number of bytes to copy is greater than or equal to 4)
     sub     r6, r4, r5          @ alignment difference between destination and source
@@ -212,36 +231,101 @@ memmove_not_aligned:
     cmp     r5, #0              @ at this point r6 == 2, destination and source are at 2 byte offset
                                 @ (r5 == 0) ? destination or source are aligned = copy 2 bytes
                                 @ (r5 == 1) ? copy 1 byte to align destination and source at 2 bytes
-    beq     memmove_hw          @ r5 == 0 ; jump to copy halfwords
-    sub     r3, r3, #1          @ decremement offset
+    beq     memmove_hw_init     @ r5 == 0 ; jump to copy halfwords
+    cmp     r7, #0
+    bmi     memmove_not_aligned_bmi
     ldrb    r4, [r1, r3]        @ r4 = [r1 + r3] ; (copy 8-bits from [r1 + r3] address to r4)
     strb    r4, [r0, r3]        @ [r0 + r3] = r4 ; (copy 8-bits from r4 to [r0 + r3] address)
-    b       memmove_hw          @ destination and source are at 2 byte offset, jump to copy halfwords
+    add     r3, r3, r7          @ push offset forward (r7 = 1) or backward (r7 = -1) by 8-bits
+    sub     r2, r2, #1          @
+    b       memmove_hw_init     @ destination and source are at 2 byte offset, jump to copy halfwords
+memmove_not_aligned_bmi:
+    add     r3, r3, r7          @ push offset forward (r7 = 1) or backward (r7 = -1) by 8-bits
+    ldrb    r4, [r1, r3]        @ r4 = [r1 + r3] ; (copy 8-bits from [r1 + r3] address to r4)
+    strb    r4, [r0, r3]        @ [r0 + r3] = r4 ; (copy 8-bits from r4 to [r0 + r3] address)
+    sub     r2, r2, #1          @
+    b       memmove_hw_init     @ destination and source are at 2 byte offset, jump to copy halfwords
+memmove_b_init:
+    cmp     r7, #0
+    bpl     memmove_b_init_bpl
+    mov     r4, #255            @ r4 = 0xFF
+    mov     r7, #255            @ r7 = 0xFF
+    lsl     r7, r7, #8          @ r7 <<= 8 (r7 = 0xFF00)
+    orr     r7, r4, r7          @ r7 |= r4 (r7 = 0xFFFF)
+    lsl     r7, r7, #8          @ r7 <<= 8 (r7 = 0xFFFF00)
+    orr     r7, r4, r7          @ r7 |= r4 (r7 = 0xFFFFFF)
+    lsl     r7, r7, #8          @ r7 <<= 8 (r7 = 0xFFFFFF00)
+    orr     r7, r4, r7          @ r7 |= r4 (r7 = 0xFFFFFFFF = -1)
+    b       memmove_b
+memmove_b_init_bpl:
+    mov     r7, #1
 memmove_b:
-    sub     r3, r3, #1          @ push offset backward by 8-bits
+    cmp     r7, #0
+    bmi     memmove_b_bmi
     ldrb    r4, [r1, r3]        @ r4 = [r1 + r3] ; (copy 8-bits from [r1 + r3] address to r4)
     strb    r4, [r0, r3]        @ [r0 + r3] = r4 ; (copy 8-bits from r4 to [r0 + r3] address)
-    cmp     r3, #0              @ check if there are more bytes left to copy
+    add     r3, r3, r7          @ push offset forward (r7 = 1) or backward (r7 = -1) by 8-bits
+    sub     r2, r2, #1          @ subtract one byte from total number of bytes
+    cmp     r2, #0              @ check if there are more bytes left to copy
     bhi     memmove_b           @ repeat
     b       memmove_end         @ until no more bytes to copy
+memmove_b_bmi:
+    add     r3, r3, r7          @ push offset forward (r7 = 1) or backward (r7 = -1) by 8-bits
+    ldrb    r4, [r1, r3]        @ r4 = [r1 + r3] ; (copy 8-bits from [r1 + r3] address to r4)
+    strb    r4, [r0, r3]        @ [r0 + r3] = r4 ; (copy 8-bits from r4 to [r0 + r3] address)
+    sub     r2, r2, #1          @ subtract one byte from total number of bytes
+    cmp     r2, #0              @ check if there are more bytes left to copy
+    bhi     memmove_b           @ repeat
+    b       memmove_end         @ until no more bytes to copy
+memmove_hw_init:
+    lsl     r7, r7, #1          @ r7 <<= 1 (r7 = 1 or r7 = -1)
 memmove_hw:
-    sub     r3, r3, #2
+    cmp     r7, #0
+    bmi     memmove_hw_bmi
     ldrh    r4, [r1, r3]        @ r4 = [r1 + r3] ; (copy 16-bits from [r1 + r3] address to r4)
     strh    r4, [r0, r3]        @ [r0 + r3] = r4 ; (copy 16-bits from r4 to [r0 + r3] address)
-    cmp     r3, #1              @ compate number of bytes to set with 1
+    add     r3, r3, r7          @ push offset forward (r7 = 2) or backward (r7 = -2) by 16-bits
+    sub     r2, r2, #2          @ subtract 2 bytes from total number of bytes
+    cmp     r2, #1              @ compare number of bytes to set with 1
     bhi     memmove_hw          @ if there are at least 2 bytes left to copy repeat copying 16-bits
-    cmp     r3, #0              @ compare number of bytes to set with 0
-    bhi     memmove_b           @ 1 byte left, jump to copy 8-bits
+    cmp     r2, #0              @ check if there are more bytes left to copy
+    bhi     memmove_b_init      @ 1 byte left, jump to copy 8-bits
     b       memmove_end         @ if no more bytes to copy go straight to end
+memmove_hw_bmi:
+    add     r3, r3, r7          @ push offset forward (r7 = 2) or backward (r7 = -2) by 16-bits
+    ldrh    r4, [r1, r3]        @ r4 = [r1 + r3] ; (copy 16-bits from [r1 + r3] address to r4)
+    strh    r4, [r0, r3]        @ [r0 + r3] = r4 ; (copy 16-bits from r4 to [r0 + r3] address)
+    sub     r2, r2, #2          @ subtract 2 bytes from total number of bytes
+    cmp     r2, #1              @ compare number of bytes to set with 1
+    bhi     memmove_hw          @ if there are at least 2 bytes left to copy repeat copying 16-bits
+    cmp     r2, #0              @ check if there are more bytes left to copy
+    bhi     memmove_b_init      @ 1 byte left, jump to copy 8-bits
+    b       memmove_end         @ if no more bytes to copy go straight to end
+memmove_w_init:
+    lsl     r7, r7, #2          @ r7 <<= 2 (r7 = 4 or r7 = -4)
 memmove_w:
-    sub     r3, r3, #4
+    cmp     r7, #0
+    bmi     memmove_w_bmi
     ldr     r4, [r1, r3]        @ r4 = [r1 + r3] ; (copy 32-bits from [r1 + r3] address to r4)
     str     r4, [r0, r3]        @ [r0 + r3] = r4 ; (copy 32-bits from r4 to [r0 + r3] address)
-    cmp     r3, #3              @ compate number of bytes to set with 3
+    add     r3, r3, r7          @ push offset forward (r7 = 4) or backward (r7 = -4) by 32-bits
+    sub     r2, r2, #4          @ subtract 4 bytes from total number of bytes
+    cmp     r2, #3              @ compare number of bytes to set with 3
     bhi     memmove_w           @ if there are at least 4 bytes left to copy repeat copying 32-bits
-    cmp     r3, #0              @ compare number of bytes to set with 0
-    bhi     memmove_b           @ less than 4 bytes left, jump to copy 8-bitss
+    cmp     r2, #0              @ compare number of bytes to set with 0
+    bhi     memmove_b_init      @ less than 4 bytes left, jump to copy 8-bits
+    b       memmove_end         @ if no more bytes to copy go straight to end
+memmove_w_bmi:
+    add     r3, r3, r7          @ push offset forward (r7 = 4) or backward (r7 = -4) by 32-bits
+    ldr     r4, [r1, r3]        @ r4 = [r1 + r3] ; (copy 32-bits from [r1 + r3] address to r4)
+    str     r4, [r0, r3]        @ [r0 + r3] = r4 ; (copy 32-bits from r4 to [r0 + r3] address)
+    sub     r2, r2, #4          @ subtract 4 bytes from total number of bytes
+    cmp     r2, #3              @ compare number of bytes to set with 3
+    bhi     memmove_w           @ if there are at least 4 bytes left to copy repeat copying 32-bits
+    cmp     r2, #0              @ compare number of bytes to set with 0
+    bhi     memmove_b_init      @ less than 4 bytes left, jump to copy 8-bits
 memmove_end:
+    pop     {r7}                @ restore preserved r7
     pop     {r6}                @ restore preserved r6
     pop     {r5}                @ restore preserved r5
     pop     {r4}                @ restore preserved r4

@@ -30,7 +30,7 @@ test_matrix_t test[] = {
     {snprintf_test, "snprintf"}
 };
 
-uint32_t testId;
+uint32_t testId = 0;
 
 
 int main(void)
@@ -45,6 +45,10 @@ int main(void)
 
     for (i = 0; i < (sizeof(test) / sizeof(test[0])); i++)
     {
+        if (i != 0)
+        {
+            printf("\n");
+        }
         printf("%s ", test[i].name);
 
         if ((*(test[i].fn))() != PASS)
@@ -53,7 +57,7 @@ int main(void)
             goto mainloop;
         }
 
-        printf("OK\n");
+        printf("OK");
         delay(1000);
     }
 

@@ -94,7 +94,6 @@ uint32_t memmove_test(void)
     uint8_t original[] = {0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48, 0x49, 0x4A, 0x4B, 0x4C, 0x4D};
     uint8_t i, j;
 
-#if 0
     for (i = 0; i <= 8; i++)
     {
         memcpy(res, dst + 5, i);
@@ -124,9 +123,6 @@ uint32_t memmove_test(void)
             memcpy(res, original, sizeof(res));
         }
     }
-#else
-    UNUSED(dst[0] && res[0] && original[0] && i && j);
-#endif
 
     return PASS;
 }
