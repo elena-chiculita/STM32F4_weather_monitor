@@ -4,7 +4,6 @@
 
 
 volatile size_t count_irq_dis_en = 0;
-volatile size_t count_sem = 0;
 
 
 void _disable_irq(void)

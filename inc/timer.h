@@ -1,6 +1,7 @@
 #ifndef _TIMER_H_
 #define _TIMER_H_
 
+#include <stddef.h>
 #include "embedded_types.h"
 #include "stm32f407.h"
 #include "list.h"
@@ -42,6 +43,7 @@ bool timer_interrupt_find_cb(list_elem_t *elem, void *arg);
 int timer_interrupt_find_pos(list_elem_t *elem, list_elem_t *new);
 void timer_interrupt_update(list_elem_t *elem, void *arg);
 uint16_t timer_set_psc(timer_t timer);
+void timer_interrupt_list_parse_and_update(size_t reschedule_period_ms_left);
 void _tim_handler(timer_t timer);
 void _tim7_handler(void);
 

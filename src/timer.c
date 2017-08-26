@@ -40,6 +40,8 @@ void timer_init(timer_t timer)
 
 void timer_reschedule(timer_t timer, uint16_t reschedule_period_ms)
 {
+    ASSERT(reschedule_period_ms > 0);
+
     /* disable interrupts */
     _disable_irq();
 
@@ -58,7 +60,6 @@ void timer_register(timer_t timer, uint16_t reschedule_period_ms, timer_reschedu
     timer_interrupt_t *new;
     list_elem_t *elem;
     bool first_cb;
-    size_t update_ms_left;
 
     ASSERT(fn != NULL);
 
@@ -76,67 +77,59 @@ void timer_register(timer_t timer, uint16_t reschedule_period_ms, timer_reschedu
         else
         {
             list_remove((list_t *)&timer_interrupt_list, elem);
-            update_ms_left = get_tim_cnt(timer);
-            list_parse((list_t *)&timer_interrupt_list, timer_interrupt_update, &update_ms_left);
 
             ((timer_interrupt_t *)elem)->reschedule_period_ms = reschedule_period_ms;
             ((timer_interrupt_t *)elem)->reschedule_period_ms_left = reschedule_period_ms;
+
+            timer_interrupt_list_parse_and_update(get_tim_cnt(timer));
             list_add_ordered((list_t *)&timer_interrupt_list, elem, timer_interrupt_find_pos);
 
             elem = list_get_first((list_t *)&timer_interrupt_list);
-            ASSERT(elem != NULL);
-            timer_reschedule(timer, ((timer_interrupt_t *)elem)->reschedule_period_ms_left);
+            if (elem)
+            {
+                timer_reschedule(timer, ((timer_interrupt_t *)elem)->reschedule_period_ms_left);
+            }
         }
-
-        /* enable interrupts */
-        _enable_irq();
-
-        return;
     }
     else
     {
-        if (reg == TIMER_UNREGISTER)
+        if (reg == TIMER_REGISTER)
         {
-            /* enable interrupts */
-            _enable_irq();
+            if (list_is_empty((list_t *)&timer_interrupt_list))
+            {
+                first_cb = TRUE;
+            }
+            else
+            {
+                first_cb = FALSE;
+            }
 
-            return;
-        }
+            new = malloc(sizeof(timer_interrupt_t));
+            ASSERT(new != NULL);
+            new->timer = timer;
+            new->reschedule = reschedule;
+            new->reschedule_period_ms = reschedule_period_ms;
+            new->reschedule_period_ms_left = reschedule_period_ms;
+            new->fn = fn;
 
-        if (list_is_empty((list_t *)&timer_interrupt_list))
-        {
-            first_cb = TRUE;
-        }
-        else
-        {
-            first_cb = FALSE;
-        }
+            if (first_cb)
+            {
+                list_add_last((list_t *)&timer_interrupt_list, &new->elem);
 
-        new = malloc(sizeof(timer_interrupt_t));
-        ASSERT(new != NULL);
-        new->timer = timer;
-        new->reschedule = reschedule;
-        new->reschedule_period_ms = reschedule_period_ms;
-        new->reschedule_period_ms_left = reschedule_period_ms;
-        new->fn = fn;
+                timer_reschedule(timer, new->reschedule_period_ms_left);
+                set_tim_cr1_cen(timer, TIM_CR1_CEN_ENABLE);
+            }
+            else
+            {
+                timer_interrupt_list_parse_and_update(get_tim_cnt(timer));
+                list_add_ordered((list_t *)&timer_interrupt_list, &new->elem, timer_interrupt_find_pos);
 
-        if (first_cb)
-        {
-            list_add_ordered((list_t *)&timer_interrupt_list, &new->elem, timer_interrupt_find_pos);
-
-            timer_reschedule(timer, new->reschedule_period_ms_left);
-            set_tim_cr1_cen(timer, TIM_CR1_CEN_ENABLE);
-        }
-        else
-        {
-            update_ms_left = get_tim_cnt(timer);
-            list_parse((list_t *)&timer_interrupt_list, timer_interrupt_update, &update_ms_left);
-
-            list_add_ordered((list_t *)&timer_interrupt_list, &new->elem, timer_interrupt_find_pos);
-
-            elem = list_get_first((list_t *)&timer_interrupt_list);
-            ASSERT(elem != NULL);
-            timer_reschedule(timer, ((timer_interrupt_t *)elem)->reschedule_period_ms_left);
+                elem = list_get_first((list_t *)&timer_interrupt_list);
+                if (elem)
+                {
+                    timer_reschedule(timer, ((timer_interrupt_t *)elem)->reschedule_period_ms_left);
+                }
+            }
         }
     }
 
@@ -180,6 +173,7 @@ void timer_interrupt_update(list_elem_t *elem, void *arg)
 {
     ASSERT((elem != NULL) && (arg != NULL));
 
+    ASSERT(((timer_interrupt_t *)elem)->reschedule_period_ms_left >= *((uint16_t *)arg));
     ((timer_interrupt_t *)elem)->reschedule_period_ms_left -= *((uint16_t *)arg);
 }
 
@@ -196,22 +190,17 @@ uint16_t timer_set_psc(timer_t timer)
     }
 }
 
-void _tim_handler(timer_t timer)
+void timer_interrupt_list_parse_and_update(size_t reschedule_period_ms_left)
 {
     list_elem_t *elem;
-    size_t reschedule_period_ms_left;
     timer_interrupt_t *tm;
     timer_callback_t fn;
 
-    elem = list_get_first((list_t *)&timer_interrupt_list);
-    if (elem == NULL)
+    if (reschedule_period_ms_left == 0)
     {
-        set_tim_cr1_cen(timer, TIM_CR1_CEN_DISABLE);
-
         return;
     }
 
-    reschedule_period_ms_left = ((timer_interrupt_t *)elem)->reschedule_period_ms_left;
     list_parse((list_t *)&timer_interrupt_list, timer_interrupt_update, &reschedule_period_ms_left);
 
     while (1)
@@ -246,6 +235,21 @@ void _tim_handler(timer_t timer)
             break;
         }
     }
+}
+
+void _tim_handler(timer_t timer)
+{
+    list_elem_t *elem;
+
+    elem = list_get_first((list_t *)&timer_interrupt_list);
+    if (elem == NULL)
+    {
+        set_tim_cr1_cen(timer, TIM_CR1_CEN_DISABLE);
+
+        return;
+    }
+
+    timer_interrupt_list_parse_and_update(((timer_interrupt_t *)elem)->reschedule_period_ms_left);
 
     elem = list_get_first((list_t *)&timer_interrupt_list);
     if (elem)
