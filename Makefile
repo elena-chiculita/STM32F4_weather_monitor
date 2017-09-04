@@ -38,7 +38,8 @@ SOURCES_CC_COMMON = core_irq_handlers.c \
                     button.c \
                     semaphore.c \
                     weather_monitor.c \
-                    weather_monitor_sync.c
+                    weather_monitor_sync.c \
+                    weather_monitor_graphics.c
 
 SOURCES_CC_BUILD = main.c
 

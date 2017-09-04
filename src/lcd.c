@@ -7,29 +7,6 @@
 
 extern lcd_function_set_v_t V;
 
-
-#define SCREEN_WIDTH 84
-#define SCREEN_ROWS 6
-#define SCREEN_SIZE (SCREEN_ROWS * SCREEN_WIDTH)
-#define SCREEN_MAX_X 83
-#define SCREEN_MAX_Y ((SCREEN_ROWS * 8) - 1)
-
-#ifdef TARGET_TEST
-#define SCREEN_ROWS_TEXT_LENGTH SCREEN_ROWS
-#else /* TARGET_TEST */
-#define SCREEN_ROWS_TEXT_LENGTH 2
-#endif /* TARGET_TEST */
-
-#if SCREEN_ROWS_TEXT_LENGTH > SCREEN_ROWS
-#error Cannot have more text rows than screen rows
-#endif
-
-#define SCREEN_ROWS_TEXT_BEGIN 0
-#define SCREEN_ROWS_TEXT_END (SCREEN_ROWS_TEXT_BEGIN + SCREEN_ROWS_TEXT_LENGTH - 1)
-#define SCREEN_ROWS_GRAPHICS_BEGIN (SCREEN_ROWS_TEXT_END + 1)
-#define SCREEN_ROWS_GRAPHICS_LENGTH (SCREEN_ROWS - SCREEN_ROWS_GRAPHICS_BEGIN)
-
-
 static uint8_t X, Y, screen[SCREEN_SIZE];
 
 
@@ -220,26 +197,34 @@ void lcd_display_chars(uint8_t *buf, uint32_t *size, uint8_t x, uint8_t y, uint1
 
 void lcd_scroll_text(void)
 {
+#if SCREEN_ROWS_TEXT_END > SCREEN_ROWS_TEXT_BEGIN
     uint8_t line;
 
-    for (line = SCREEN_ROWS_TEXT_BEGIN; line < SCREEN_ROWS_TEXT_END; line++)
+    for (line = SCREEN_ROWS_TEXT_BEGIN; line < SCREEN_ROWS_TEXT_LENGTH; line++)
     {
         memcpy(screen + (SCREEN_WIDTH * line), screen + (SCREEN_WIDTH * (line + 1)), SCREEN_WIDTH);
     }
+#endif
+
     memset(screen + (SCREEN_WIDTH * SCREEN_ROWS_TEXT_END), 0, SCREEN_WIDTH);
 }
 
 void lcd_dot(uint8_t x, uint8_t y)
 {
+#if SCREEN_ROWS_GRAPHICS_LENGTH > 0
     uint8_t row, offset;
 
     ASSERT(x <= SCREEN_MAX_X);
     ASSERT(y <= SCREEN_MAX_Y);
 
+    y += SCREEN_GRAPHICS_Y_ORIGIN_OFFSET;
     row = y / 8;
     offset = y % 8;
 
-    *(screen + (row * SCREEN_MAX_X) + x) = 1 << offset;
+    *(screen + (row * SCREEN_WIDTH) + x) |= 1 << offset;
+#else
+    UNUSED(x && y);
+#endif
 }
 
 void lcd_line(int16_t x0, int16_t y0, int16_t x1, int16_t y1)
@@ -278,7 +263,7 @@ void lcd_line(int16_t x0, int16_t y0, int16_t x1, int16_t y1)
 
             if ((x >= 0) && (min_y >= 0) && (x <= SCREEN_MAX_X) && (min_y <= SCREEN_MAX_Y))
             {
-                *(screen + ((min_y / 8) * SCREEN_MAX_X) + x) |= 1 << (min_y % 8);
+                lcd_dot(x, min_y);
             }
         }
     }
@@ -306,7 +291,7 @@ void lcd_line(int16_t x0, int16_t y0, int16_t x1, int16_t y1)
 
             if ((min_x >= 0) && (y >= 0) && (min_x <= SCREEN_MAX_X) && (y <= SCREEN_MAX_Y))
             {
-                *(screen + ((y / 8) * SCREEN_MAX_X) + min_x) |= 1 << (y % 8);
+                lcd_dot(min_x, y);
             }
         }
     }
@@ -367,6 +352,11 @@ void lcd_circle(int16_t x0, int16_t y0, uint8_t r)
         y1 = y2;
         y3 = y4;
     }
+}
+
+void lcd_clear_graphics(void)
+{
+    memset(screen + SCREEN_WIDTH * SCREEN_ROWS_GRAPHICS_BEGIN, 0, SCREEN_WIDTH * SCREEN_ROWS_GRAPHICS_LENGTH);
 }
 
 void lcd_refresh(void)

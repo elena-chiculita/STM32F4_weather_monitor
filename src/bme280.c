@@ -150,6 +150,6 @@ void bme280_poll(int32_t *press, int32_t *temp, int32_t *hum)
 
     hal_bme280_get_press_temp_hum(&press_raw, &temp_raw, (int16_t *)&hum_raw);
     *temp = bme280_compensate_temp(temp_raw);
-    *press = bme280_compensate_press(press_raw);
-    *hum = bme280_compensate_hum(hum_raw);
+    *press = bme280_compensate_press(press_raw) >> 8;
+    *hum = (bme280_compensate_hum(hum_raw) * 100) >> 10;
 }
