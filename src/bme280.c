@@ -1,6 +1,5 @@
 #include "bme280.h"
 #include "int_64.h"
-#include "lib.h"
 #include "util.h"
 
 

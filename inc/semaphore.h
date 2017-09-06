@@ -11,7 +11,7 @@ typedef enum sem_type_tag
     SEM_TYPE_COUNTING = 1
 } sem_type_t;
 
-typedef struct sem_tag
+typedef volatile struct semaphore_tag
 {
     size_t count;
     sem_type_t type;

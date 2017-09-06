@@ -10,7 +10,7 @@ static weather_monitor_display_t weather_monitor_display;
 static volatile weather_monitor_refresh_rate_t weather_monitor_refresh_rate;
 static volatile bool weather_monitor_changed_refresh;
 static volatile bool weather_monitor_poll;
-static volatile sem_handle_t weather_monitor_refresh_sem;
+static sem_handle_t weather_monitor_refresh_sem;
 
 
 void weather_monitor_sync_init(void)

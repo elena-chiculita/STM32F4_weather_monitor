@@ -45,5 +45,5 @@ void sem_give(sem_handle_t sem)
 void sem_destroy(sem_handle_t sem)
 {
     ASSERT(sem != NULL);
-    free(sem);
+    free((void *)sem);
 }
